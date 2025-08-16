@@ -6,28 +6,33 @@ import style from './navbar.module.css'
 
 const links = [
     {
-        id: 2,
+        id: 1,
         title: "Loci",
         url: "/about",
     },
     {
-        id: 3,
+        id: 2,
         title: "Your Palace",
         url: "/blog",
     },
     {
-        id: 4,
+        id: 3,
         title: "Templates",
         url: "/blog",
     },
     {
-        id: 5,
+        id: 4,
         title: "Quiz",
         url: "/dashboard",
     },
     {
-        id: 6,
+        id: 5,
         title: "Profile",
+        url: "/contact",
+    },
+    {
+        id: 6,
+        title: "FAQ",
         url: "/contact",
     }
 ]

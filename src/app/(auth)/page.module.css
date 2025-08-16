@@ -3,6 +3,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100vh;
+  background-color: #d4dac0; /* dein grünlicher Hintergrund */
 }
 
 /* Card */
@@ -37,7 +39,7 @@
 
 /* Gehirn-Bild */
 .icon {
-  width: 120px;
+  width: 70px;
   margin: 0 auto 20px auto;
   display: block;
 }
@@ -70,25 +72,3 @@
   margin-top: 20px;
   font-size: 14px;
 }
-
-.passwordWrapper {
-  position: relative;
-  width: 100%;
-}
-
-.passwordWrapper input {
-  width: 100%;
-  padding-right: 2.5rem; /* Platz für das Auge */
-  box-sizing: border-box;
-}
-
-.eyeIcon {
-  position: absolute;
-  right: 10px;
-  top: 57%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: #555;
-}
-
