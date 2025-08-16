@@ -1,5 +1,6 @@
 import Image from "next/image";
 import styles from "./page.module.css";
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -24,12 +25,12 @@ export default function Home() {
 
       {/* Rechte Seite */}
       <div className={styles.right}>
-        <button className={styles.button}>Learn the method</button>
-        <button className={styles.button}>Create your palace</button>
-        <button className={styles.button}>Use a template</button>
-        <button className={styles.button}>Quiz Module</button>
-        <button className={styles.button}>FAQ</button>
-        <button className={styles.button}>Log-in</button>
+        <Link href="/about" className={styles.button}>Learn the method</Link>
+        <Link href="/yourpalace" className={styles.button}>Create your palace</Link>
+        <Link href="/templates" className={styles.button}>Use a template</Link>
+        <Link href="/quiz" className={styles.button}>Quiz Module</Link>
+        <Link href="/faq" className={styles.button}>FAQ</Link>
+        <Link href="/login" className={styles.button}>Log-in</Link>
         {/*<Image src="/instagramIcon.png" alt="Instagram" width={24} height={24} />*/}
       </div>
     </div>

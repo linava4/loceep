@@ -13,27 +13,27 @@ const links = [
     {
         id: 2,
         title: "Your Palace",
-        url: "/blog",
+        url: "/yourpalace",
     },
     {
         id: 3,
         title: "Templates",
-        url: "/blog",
+        url: "/templates",
     },
     {
         id: 4,
         title: "Quiz",
-        url: "/dashboard",
+        url: "/quiz",
     },
     {
         id: 5,
         title: "Profile",
-        url: "/contact",
+        url: "/profile",
     },
     {
         id: 6,
         title: "FAQ",
-        url: "/contact",
+        url: "/faq",
     }
 ]
 
