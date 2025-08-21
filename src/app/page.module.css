@@ -5,8 +5,27 @@
 
 }
 
+
+
+
+
+.pageContainer {
+  font-family: sans-serif;
+}
+
+/* HERO SECTION - ganzer Bildschirm */
+.hero {
+  display: flex;
+  justify-content:space-evenly;
+  align-items: center;
+  min-height: 100vh;
+  padding: 0 60px;
+  padding-bottom: 20vh;
+  flex-wrap: wrap;
+}
+
 .left {
-  flex: 1;
+  flex: 0.5;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -40,7 +59,7 @@
 }
 
 .right {
-  flex: 1;
+  flex: 0.5;
   background-color: #f4f4ee;
   padding: 50px;
   display: flex;
@@ -73,20 +92,58 @@
   margin-bottom: 10px;
 }
 
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    align-items: center; /* Optional, damit Zentrierung erhalten bleibt */
-  }
+/* INFO SECTION */
+.info {
+  padding: 30px 20vw;
+  background-color: #423f32;
+  min-height: 20vh;
+  min-width: 100vw;
+  color: #fff;
+  text-align: center;
+}
 
-  .right, .left {
-    max-width: none; /* Aufheben der max-width: 400px */
+.info h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.info ol {
+  text-align: left;
+  display: inline-block;
+  margin-top: 20px;
+  padding-left: 20px;
+}
+
+.infolist {
+   padding: 20px;
+   text-align: left;
+}
+
+.infotwo{
+  padding: 40px 20vw;
+  background-color: #c0caa9;
+  min-height: 40vh;
+  min-width: 100vw;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+}
+.infolistleft {
+   padding: 20px;
+   text-align: left;
+}
+.infolistright {
+   text-align: right;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    padding: 30px 20px;
   }
 
   .left, .right {
-    max-width: 100%; /* Damit sie die volle Breite nehmen */
-    padding: 20px 30px; /* Optional für etwas weniger Padding auf kleineren Geräten */
+    width: 100%;
   }
-
-  
 }
