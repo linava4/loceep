@@ -21,24 +21,18 @@ const Profile = () => {
       </div>
 
       <div className={style.main}>
-        <h2>User Data</h2>
+        <h2>Settings</h2>
         <form className={style.form}>
-          <p>Firstname</p>
-          <input type="text" placeholder='Firstname' className={style.input} required />
+          <p>Language</p>
+          <select className={style.input} required>
+            <option value="">Select a language</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+            <option value="fr">Français</option>
+          </select>
 
-          <p>Surname</p>
-          <input type="text" placeholder='Surname' className={style.input} required />
-
-          <p>Gender</p>
-          <input type="text" placeholder='Gender' className={style.input} required />
-
-          <p>Birthdate</p>
-          <input type="date" className={style.input} required />
-
-          <p>E-mail</p>
-          <input type="email" placeholder='E-mail' className={style.input} required />
-
-          <button type="submit">Save changes</button>
+          <p>Delete Account</p>
+          <button type="submit">Delete now</button>
         </form>
 
         <p className={style.forgot}>Forgot Password?</p>

@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import style from './navbar.module.css'
 
 const links = [
-    { id: 1, title: "Loci", url: "/about" },
+    { id: 1, title: "FAQ", url: "/faq" },
     { id: 2, title: "Your Palace", url: "/yourpalace" },
     { id: 3, title: "Templates", url: "/templates" },
     { id: 4, title: "Quiz", url: "/quiz" },
