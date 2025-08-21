@@ -2,6 +2,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { useRef } from "react";
+import Link from "next/link";
 
 export default function Home() {
   const infoRef = useRef(null);
@@ -37,11 +38,11 @@ export default function Home() {
           <button className={styles.button} onClick={scrollToInfo}>
             Learn the method
           </button>
-          <button className={styles.button}>Create your palace</button>
-          <button className={styles.button}>Use a template</button>
-          <button className={styles.button}>Quiz Module</button>
-          <button className={styles.button}>FAQ</button>
-          <button className={styles.button}>Log-in</button>
+          <Link href="/yourpalace" className={styles.button}>Create your palace</Link>
+          <Link href="/templates" className={styles.button}>Use a template</Link>
+          <Link href="/quiz" className={styles.button}>Quiz Module</Link>
+          <Link href="/faq" className={styles.button}>FAQ</Link>
+          <Link href="/login" className={styles.button}>Log-in</Link>
         </div>
       </section>
 
