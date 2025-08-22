@@ -1,38 +1,64 @@
 "use client";
 import { Stage, Layer, Rect, Circle } from "react-konva";
+import { useEffect, useRef, useState } from "react";
 
+export default function PalaceCanvas({ elements, handleWheel, dropRef }) {
+  const containerRef = useRef(null);
+  const [stageSize, setStageSize] = useState({ width: 1300, height: 670 });
 
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        setStageSize({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        });
+      }
+    };
 
-export default function KonvaCanvas({ elements, handleWheel, dropRef, style }) {
+    updateSize(); // initial
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
   return (
-    <div className={style.canvas} ref={dropRef}>
-      <Stage width={800} height={600}>
+    <div
+        ref={node => {
+          containerRef.current = node;
+          if (dropRef) dropRef(node);
+        }}
+        className="canvasWrapper"   // <--- statt style width/height
+      >
+       <Stage width={stageSize.width} height={stageSize.height}>
         <Layer>
           {elements.map(el => {
-            if (el.type === "room")
-              return (
+            if (el.type === "room") {
+              let fillColor;
+              if (el.label === "Raum1") fillColor = "#cfe8f3";
+              if (el.label === "Raum2") fillColor = "#afa8f1";
+                        return (
                 <Rect
                   key={el.id}
                   x={el.x}
                   y={el.y}
-                  width={100}
-                  height={100}
-                  fill="lightblue"
+                  width={120}
+                  height={120}
+                  fill={fillColor || "gray"}
                   draggable
                   scaleX={el.scale}
                   scaleY={el.scale}
                   onWheel={e => handleWheel(e, el.id)}
                 />
-              );
+              );}
             if (el.type === "object")
               return (
                 <Rect
                   key={el.id}
                   x={el.x}
                   y={el.y}
-                  width={60}
+                  width={80}
                   height={60}
-                  fill="orange"
+                  fill="#f7c27c"
                   draggable
                   scaleX={el.scale}
                   scaleY={el.scale}
@@ -45,7 +71,7 @@ export default function KonvaCanvas({ elements, handleWheel, dropRef, style }) {
                   key={el.id}
                   x={el.x}
                   y={el.y}
-                  radius={10}
+                  radius={12}
                   fill="red"
                   draggable
                   scaleX={el.scale}
