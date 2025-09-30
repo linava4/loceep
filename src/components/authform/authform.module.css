@@ -1,8 +1,11 @@
+
+
 /* Ganze Seite mit Hintergrund */
-.page {
+.container {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 90vh;
 }
 
 /* Card */

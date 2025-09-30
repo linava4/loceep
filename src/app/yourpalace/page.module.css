@@ -1,52 +1,52 @@
 .container {
   display: flex;
   height: 100vh;
+  width: 100%;
+  overflow: hidden;
 }
 
 .sidebar {
-  flex: 0.2;
-  background: #d0d7b3; 
-  padding: 20px;
+  flex: 0 0 80px; /* Sidebar fix für Icons */
+  background: #d0d7b3;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 16px;
 }
 
 .canvasWrapper {
-  flex: 0.8;
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f5f6eb; /* Canvas-Hintergrund */
-  margin: 40px;
+  background: #f5f6eb;
+  margin: 10px;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas {
   width: 100%;
   height: 100%;
-  max-width: 1300px;
-  max-height: 670px;
-  
 }
-
 
 .section {
-  width: 100%;
-  background: #f5f6eb;
-  margin-bottom: 16px;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.section h4 {
-  margin: 0 0 8px;
-  font-weight: normal;
-  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .draggableItem {
-  padding: 6px;
-  margin-bottom: 6px;
+  width: 48px;
+  height: 48px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
   cursor: grab;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
 }

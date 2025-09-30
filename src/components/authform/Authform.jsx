@@ -8,7 +8,7 @@ const AuthForm = ({ type }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className={style.page}>
+    <div className={style.container}>
       <div className={style.card}>
         <h1 className={style.logo}>LOCE<span>EP</span></h1>
         <h2 className={style.title}>{isSignIn ? "Login" : "Register"}</h2>

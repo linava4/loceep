@@ -33,3 +33,35 @@
     color: #eee;
     font-weight: bold;
 }
+
+.faqItem {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+  width: 40vw;
+}
+.faqQuestion {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.faqArrow {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+.faqAnswer {
+  margin-top: 0.5rem;
+  color: #444;
+}
+.faqList {
+  max-width: 600px;
+  margin: 0 auto;
+}
