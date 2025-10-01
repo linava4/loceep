@@ -47,6 +47,7 @@ function FAQItem({ question, answer }) {
 export default function FAQPage() {
   return (
     <div className={styles.container}>
+      <br/>
       <h2>FAQ</h2>
       <div className={styles.faqList}>
         {FAQS.map((faq) => (

@@ -3,18 +3,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Stage, Layer, Rect, Text } from "react-konva";
+import { Stage, Layer, Rect, Text, Group } from "react-konva";
 import styles from "./page.module.css";
 
 const ItemTypes = { ROOM: "room", OBJECT: "object", ANCHOR: "anchor" };
 
-// Sidebar-Items (nur Icons)
+// Rastergröße
+const GRID_SIZE = 140;
+
+// Sidebar-Items mit verschiedenen Raumgrößen
 const SIDEBAR_ITEMS = [
   {
     section: "Räume",
     items: [
-      { type: ItemTypes.ROOM, icon: "🏠" },
-      { type: ItemTypes.ROOM, icon: "🏛️" },
+      { type: ItemTypes.ROOM, icon: "🏠", width: GRID_SIZE, height: GRID_SIZE },
+      { type: ItemTypes.ROOM, icon: "🏛️", width: GRID_SIZE * 2, height: GRID_SIZE },
+      { type: ItemTypes.ROOM, icon: "🏢", width: GRID_SIZE * 2, height: GRID_SIZE * 2 },
     ],
   },
   {
@@ -33,14 +37,11 @@ const SIDEBAR_ITEMS = [
   },
 ];
 
-// Rastergröße für Räume
-const GRID_SIZE = 140;
-
 // Sidebar-Item (draggable)
-const DraggableItem = ({ type, icon }) => {
+const DraggableItem = ({ type, icon, width, height }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
-    item: { type, icon },
+    item: { type, icon, width, height },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   }));
 
@@ -58,23 +59,26 @@ const DraggableItem = ({ type, icon }) => {
 // Hilfsfunktion: Räume dürfen nicht überlappen
 const isOverlapping = (newRoom, rooms) => {
   return rooms.some((r) => {
-    const size = GRID_SIZE;
     return !(
-      newRoom.x + size <= r.x ||
-      newRoom.x >= r.x + size ||
-      newRoom.y + size <= r.y ||
-      newRoom.y >= r.y + size
+      newRoom.x + newRoom.width <= r.x ||
+      newRoom.x >= r.x + r.width ||
+      newRoom.y + newRoom.height <= r.y ||
+      newRoom.y >= r.y + r.height
     );
   });
 };
 
 // Hilfsfunktion: Position auf Raster setzen
-const snapToGrid = (pos) => {
-  return {
-    x: Math.round(pos.x / GRID_SIZE) * GRID_SIZE,
-    y: Math.round(pos.y / GRID_SIZE) * GRID_SIZE,
-  };
-};
+const snapToGrid = (pos) => ({
+  x: Math.round(pos.x / GRID_SIZE) * GRID_SIZE,
+  y: Math.round(pos.y / GRID_SIZE) * GRID_SIZE,
+});
+
+// Prüfen, ob ein Punkt in einem Raum liegt
+const findRoomAtPosition = (x, y, rooms) =>
+  rooms.find(
+    (r) => x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height
+  );
 
 // Canvas-Komponente
 function CanvasArea({ elements, setElements }) {
@@ -97,35 +101,38 @@ function CanvasArea({ elements, setElements }) {
       if (!offset || !canvasRef.current) return;
 
       const bounds = canvasRef.current.getBoundingClientRect();
-      let pos = {
-        x: offset.x - bounds.left,
-        y: offset.y - bounds.top,
-      };
+      let pos = { x: offset.x - bounds.left, y: offset.y - bounds.top };
 
       if (item.type === ItemTypes.ROOM) {
-        // Räume nur in Grid
         pos = snapToGrid(pos);
-
-        // Begrenzung auf Grid
-        pos.x = Math.max(0, Math.min(pos.x, Math.floor((bounds.width - GRID_SIZE) / GRID_SIZE) * GRID_SIZE));
-        pos.y = Math.max(0, Math.min(pos.y, Math.floor((bounds.height - GRID_SIZE) / GRID_SIZE) * GRID_SIZE));
-
-        const newEl = { id: Date.now(), type: item.type, icon: item.icon, x: pos.x, y: pos.y };
-
-        if (isOverlapping(newEl, elements.filter(el => el.type === ItemTypes.ROOM))) return;
-
-        setElements(prev => [...prev, newEl]);
+        const newEl = {
+          id: Date.now(),
+          type: item.type,
+          icon: item.icon,
+          x: pos.x,
+          y: pos.y,
+          width: item.width || GRID_SIZE,
+          height: item.height || GRID_SIZE,
+        };
+        if (isOverlapping(newEl, elements.filter((el) => el.type === ItemTypes.ROOM))) return;
+        setElements((prev) => [...prev, newEl]);
       } else {
-        // Objekte frei platzierbar
+        // Objekt: prüfen, ob es in einem Raum liegt
+        const room = findRoomAtPosition(
+          pos.x,
+          pos.y,
+          elements.filter((el) => el.type === ItemTypes.ROOM)
+        );
         const size = 32;
         const newEl = {
           id: Date.now(),
           type: item.type,
           icon: item.icon,
-          x: Math.max(0, Math.min(pos.x, bounds.width - size)),
-          y: Math.max(0, Math.min(pos.y, bounds.height - size)),
+          x: room ? pos.x - room.x : pos.x, // relative Position im Raum speichern
+          y: room ? pos.y - room.y : pos.y,
+          roomId: room ? room.id : null,
         };
-        setElements(prev => [...prev, newEl]);
+        setElements((prev) => [...prev, newEl]);
       }
     },
   }));
@@ -136,57 +143,93 @@ function CanvasArea({ elements, setElements }) {
     let newY = y;
 
     if (type === ItemTypes.ROOM) {
-      // Snap to grid
+      const el = elements.find((el) => el.id === id);
       const snapped = snapToGrid({ x, y });
-      newX = Math.max(0, Math.min(snapped.x, Math.floor((stageSize.width - GRID_SIZE) / GRID_SIZE) * GRID_SIZE));
-      newY = Math.max(0, Math.min(snapped.y, Math.floor((stageSize.height - GRID_SIZE) / GRID_SIZE) * GRID_SIZE));
+      newX = Math.max(0, Math.min(snapped.x, stageSize.width - el.width));
+      newY = Math.max(0, Math.min(snapped.y, stageSize.height - el.height));
 
-      const movedEl = { id, type, x: newX, y: newY };
-      if (isOverlapping(movedEl, elements.filter(el => el.type === ItemTypes.ROOM && el.id !== id))) {
-        // Alte Position wiederherstellen
-        const old = elements.find(el => el.id === id);
-        e.target.position({ x: old.x, y: old.y });
+      const movedEl = { ...el, x: newX, y: newY };
+      if (isOverlapping(movedEl, elements.filter((r) => r.type === ItemTypes.ROOM && r.id !== id))) {
+        e.target.position({ x: el.x, y: el.y });
         return;
       }
+
+      // Raum + zugehörige Objekte verschieben
+      const dx = newX - el.x;
+      const dy = newY - el.y;
+      setElements((prev) =>
+        prev.map((elm) => {
+          if (elm.id === id) return { ...elm, x: newX, y: newY };
+          if (elm.roomId === id) return { ...elm, x: elm.x, y: elm.y }; // relative Position beibehalten
+          return elm;
+        })
+      );
+
+      e.target.position({ x: newX, y: newY });
     } else {
-      // Objekte frei verschiebbar
+      const obj = elements.find((el) => el.id === id);
+      if (obj.roomId) {
+        const room = elements.find((r) => r.id === obj.roomId);
+        if (room) {
+          // neue relative Position innerhalb des Raums speichern
+          setElements((prev) =>
+            prev.map((el) =>
+              el.id === id ? { ...el, x: newX - room.x, y: newY - room.y } : el
+            )
+          );
+          e.target.position({ x: newX, y: newY });
+          return;
+        }
+      }
+
+      // freies Objekt
       const size = 32;
       newX = Math.max(0, Math.min(newX, stageSize.width - size));
       newY = Math.max(0, Math.min(newY, stageSize.height - size));
+      setElements((prev) =>
+        prev.map((el) => (el.id === id ? { ...el, x: newX, y: newY } : el))
+      );
+      e.target.position({ x: newX, y: newY });
     }
-
-    setElements(prev =>
-      prev.map(el => (el.id === id ? { ...el, x: newX, y: newY } : el))
-    );
   };
 
   return (
     <div className={styles.canvasWrapper} ref={drop}>
       <div className={styles.canvas} ref={canvasRef}>
         <Stage width={stageSize.width} height={stageSize.height}>
-          {/* Räume-Layer (hinten) */}
           <Layer>
             {elements
               .filter((el) => el.type === ItemTypes.ROOM)
-              .map((el) => (
-                <Rect
-                  key={el.id}
-                  x={el.x}
-                  y={el.y}
-                  width={GRID_SIZE}
-                  height={GRID_SIZE}
-                  fill="#d0d7b3"
-                  stroke="black"
+              .map((room) => (
+                <Group
+                  key={room.id}
+                  x={room.x}
+                  y={room.y}
                   draggable
-                  onDragEnd={(e) => handleDragEnd(e, el.id, el.type)}
-                />
+                  onDragEnd={(e) => handleDragEnd(e, room.id, room.type)}
+                >
+                  <Rect width={room.width} height={room.height} fill="#d0d7b3" stroke="black" />
+                  {elements
+                    .filter((obj) => obj.roomId === room.id)
+                    .map((obj) => (
+                      <Text
+                        key={obj.id}
+                        x={obj.x}
+                        y={obj.y}
+                        text={obj.icon}
+                        fontSize={32}
+                        draggable
+                        onDragEnd={(e) => handleDragEnd(e, obj.id, obj.type)}
+                      />
+                    ))}
+                </Group>
               ))}
           </Layer>
 
-          {/* Objekte & Anker-Layer (immer vorne) */}
+          {/* Freie Objekte (nicht in Räumen) */}
           <Layer>
             {elements
-              .filter((el) => el.type !== ItemTypes.ROOM)
+              .filter((el) => el.type !== ItemTypes.ROOM && !el.roomId)
               .map((el) => (
                 <Text
                   key={el.id}
