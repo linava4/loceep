@@ -7,8 +7,9 @@ import { Stage, Layer, Rect, Text, Group } from "react-konva";
 import styles from "./page.module.css";
 
 const ItemTypes = { ROOM: "room", OBJECT: "object", ANCHOR: "anchor" };
-const GRID_SIZE = 140;
+const GRID_SIZE = 100; //Größe des Rasters
 
+//Später aus der DB laden
 const SIDEBAR_ITEMS = [
   {
     section: "Räume",
@@ -34,6 +35,7 @@ const SIDEBAR_ITEMS = [
   },
 ];
 
+// macht ein Element in der Sidebar ziehbar
 const DraggableItem = ({ type, icon, width, height, variant }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
@@ -43,19 +45,21 @@ const DraggableItem = ({ type, icon, width, height, variant }) => {
   return (
     <div
       ref={drag}
-      className={styles.draggableItem}
-      style={{ opacity: isDragging ? 0.5 : 1, cursor: "grab" }}
+      className={`${styles.draggableItem} ${isDragging ? styles.dragging : ""}`}
     >
       {icon}
     </div>
   );
 };
 
+//Hilfsfunktionen
+//damit Räume im Raster ausgerichtet werden
 const snapToGrid = (pos) => ({
   x: Math.round(pos.x / GRID_SIZE) * GRID_SIZE,
   y: Math.round(pos.y / GRID_SIZE) * GRID_SIZE,
 });
 
+//prüft, ob sich zwei Räume überlappen
 const isOverlapping = (newRoom, rooms) => {
   return rooms.some((r) => {
     return !(
@@ -67,42 +71,66 @@ const isOverlapping = (newRoom, rooms) => {
   });
 };
 
+//findet heraus, ob eine Position in einem Raum liegt
 const findRoomAtPosition = (x, y, rooms) =>
   rooms.find(
     (r) => x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height
   );
 
+//Canvas Bereich
 function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomId }) {
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
-  const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
+  const [stageSize, setStageSize] = useState({ width: 200, height: 800 });
 
+  //Setzt die Canvas größe beim Laden
   useEffect(() => {
-    if (canvasRef.current) {
-      setStageSize({
-        width: canvasRef.current.offsetWidth,
-        height: canvasRef.current.offsetHeight,
-      });
-    }
-  }, []);
+  if (!canvasRef.current) return;
 
+  const updateSize = () => {
+    const el = canvasRef.current;
+    setStageSize({
+      width: el.clientWidth,
+      height: el.clientHeight,
+    });
+  };
+
+  const observer = new ResizeObserver(updateSize);
+  observer.observe(canvasRef.current);
+
+  // initial
+  updateSize();
+
+  return () => observer.disconnect();
+}, []);
+
+
+  //Funktion für alle Items
   const [, drop] = useDrop(() => ({
+    //Objekte können hier abgelegt werden
     accept: Object.values(ItemTypes),
+    //monitor liefert die Position des Mauszeigers
     drop: (item, monitor) => {
+      //ist Canvas und Stage verfügbar?
       if (!canvasRef.current || !stageRef.current) return;
 
+      //Postion und größe des Canvas
       const bounds = canvasRef.current.getBoundingClientRect();
+      //Position des Mauszeigers
       const clientOffset = monitor.getClientOffset();
       if (!clientOffset) return;
 
+      //Position relativ zum Canvas
       const pos = {
         x: clientOffset.x - bounds.left,
         y: clientOffset.y - bounds.top,
       };
 
+      //wenn es ein Raum ist
       if (item.type === ItemTypes.ROOM) {
-        const snapped = snapToGrid(pos);
-        const id = getNextRoomId(item.variant);
+        const snapped = snapToGrid(pos); //an Raster ausrichten
+        const id = getNextRoomId(item.variant); //id holen
+        //neuen Raum erstellen
         const newRoom = {
           id,
           type: item.type,
@@ -113,29 +141,35 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
           height: item.height || GRID_SIZE,
           variant: item.variant,
         };
+
+        //Überlappung prüfen
         if (isOverlapping(newRoom, elements.filter((el) => el.type === ItemTypes.ROOM))) return;
         setElements((prev) => [...prev, newRoom]);
         return;
       }
 
-      const rooms = elements.filter((el) => el.type === ItemTypes.ROOM);
-      const room = findRoomAtPosition(pos.x, pos.y, rooms);
+      const rooms = elements.filter((el) => el.type === ItemTypes.ROOM); //erstellt ein Array mit nur Räumen
+      const room = findRoomAtPosition(pos.x, pos.y, rooms); //prüft, ob die Position in einem Raum liegt
 
+      //Objekt in einem Raum
       if (room) {
+        //relative Position im Raum ermitteln
         const relX = pos.x - room.x;
         const relY = pos.y - room.y;
         const newObj = {
-          id: `obj-${Date.now()}`,
+          id: `obj-${Math.floor(Math.random() * 10000)}-${Date.now()}`, //id
           type: item.type,
           icon: item.icon,
           x: relX,
           y: relY,
           roomId: room.id,
         };
-        setElements((prev) => [...prev, newObj]);
-      } else {
+        setElements((prev) => [...prev, newObj]); //Objekt hinzufügen
+      }
+      //Objekt außerhalb eines Raums
+      else {
         const newObj = {
-          id: `obj-${Date.now()}`,
+          id: `obj-${Math.floor(Math.random() * 10000)}-${Date.now()}`,
           type: item.type,
           icon: item.icon,
           x: pos.x,
@@ -147,16 +181,19 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
     },
   }));
 
+  //Funktion beim Verschieben eines Elements
   const handleDragEnd = (e, id, type) => {
     const stage = stageRef.current;
     if (!stage) return;
 
+    //Absoulte Position des Elements
     const absPos = e.target.getAbsolutePosition();
     const el = elements.find((el) => el.id === id);
     if (!el) return;
 
     if (type === ItemTypes.ROOM) {
       const snapped = snapToGrid(absPos);
+      //Räume innerhalb der Canvas halten
       const newX = Math.max(0, Math.min(snapped.x, stageSize.width - el.width));
       const newY = Math.max(0, Math.min(snapped.y, stageSize.height - el.height));
       const movedRoom = { ...el, x: newX, y: newY };
@@ -171,11 +208,13 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
       return;
     }
 
+    //Verhindert dass das Klick Ereignis weitergegeben wird
     e.cancelBubble = true;
     const { x: absX, y: absY } = absPos;
     const rooms = elements.filter((r) => r.type === ItemTypes.ROOM);
     const room = findRoomAtPosition(absX, absY, rooms);
 
+    //Position relativ zum Raum
     if (room) {
       const relX = absX - room.x;
       const relY = absY - room.y;
@@ -187,6 +226,7 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
     } else {
       const clampedX = Math.max(0, Math.min(absX, stageSize.width - 32));
       const clampedY = Math.max(0, Math.min(absY, stageSize.height - 32));
+      //roomId auf null setzen, wenn es außerhalb eines Raums ist
       setElements((prev) =>
         prev.map((elm) =>
           elm.id === id ? { ...elm, x: clampedX, y: clampedY, roomId: null } : elm
@@ -195,10 +235,13 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
     }
   };
 
+  //Rendern der Canvas von dem video
   return (
     <div className={styles.canvasWrapper} ref={drop}>
       <div className={styles.canvas} ref={canvasRef}>
-        <Stage ref={stageRef} width={stageSize.width} height={stageSize.height}>
+        {/*Oberste Ebene*/}
+        <Stage ref={stageRef} width={stageSize.width} height={stageSize.height} style={{ width: "100%", height: "100%" }}>
+          {/*Erste Layer: Räume und deren Inhalte*/}
           <Layer>
             {elements.filter((el) => el.type === ItemTypes.ROOM).map((room) => (
               <Group
@@ -215,8 +258,8 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
                 <Rect
                   width={room.width}
                   height={room.height}
-                  fill={selected?.id === room.id ? "lightgreen" : "#d0d7b3"}
-                  stroke="black"
+                  fill="#d0d7b3"
+                  stroke={selected?.id === room.id ? "lightgreen" : "black"}
                 />
                 {elements.filter((obj) => obj.roomId === room.id).map((obj) => (
                   <Text
@@ -229,6 +272,7 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
                     onDragStart={(e) => (e.cancelBubble = true)}
                     onDragEnd={(e) => handleDragEnd(e, obj.id, obj.type)}
                     onClick={(e) => {
+                      {/* Verhindert, dass der Raum auch ausgewählt wird */}
                       e.cancelBubble = true;
                       setSelected({ id: obj.id, type: obj.type });
                     }}
@@ -237,7 +281,7 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
               </Group>
             ))}
           </Layer>
-
+          {/*Zweite Layer: Freistehende Objekte*/}
           <Layer>
             {elements.filter((el) => el.type !== ItemTypes.ROOM && !el.roomId).map((el) => (
               <Text
@@ -266,12 +310,14 @@ export default function YourPalace() {
   const [elements, setElements] = useState([]);
   const [selected, setSelected] = useState(null);
 
+  //Verfügbare Raum IDs pro Variante
   const [availableRoomIds, setAvailableRoomIds] = useState({
     1: Array.from({ length: 10 }, (_, i) => 10 + i),
     2: Array.from({ length: 10 }, (_, i) => 20 + i),
     3: Array.from({ length: 10 }, (_, i) => 30 + i),
   });
 
+  //gibt die nächste verfügbare Raum ID zurück und entfernt sie aus dem Pool
   const getNextRoomId = (variant) => {
     const ids = availableRoomIds[variant];
     const baseId = ids && ids.length > 0 ? ids[0] : Math.floor(Math.random() * 1000);
@@ -282,6 +328,7 @@ export default function YourPalace() {
     return `room-${variant}-${baseId}-${Date.now()}`;
   };
 
+  //gibt eine Raum ID zurück in den Pool wenn ein Raum gelöscht wird
   const releaseRoomId = (id) => {
     const match = id.match(/^room-(\d)-(\d+)/);
     if (!match) return;
@@ -293,6 +340,7 @@ export default function YourPalace() {
     }));
   };
 
+  //Löscht das ausgewählte Element
   const handleDeleteSelected = () => {
     if (!selected) return;
     if (selected.type === ItemTypes.ROOM) {
@@ -306,6 +354,7 @@ export default function YourPalace() {
     setSelected(null);
   };
 
+  //Speichert den Palast auf dem Server
   const handleSave = async () => {
     const rooms = elements.filter((el) => el.type === ItemTypes.ROOM);
     const objects = elements.filter((el) => el.type !== ItemTypes.ROOM);
@@ -324,10 +373,11 @@ export default function YourPalace() {
     }
   };
 
+  //eigentlicher Anzeige
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className={styles.container} style={{ display: "flex", gap: 12 }}>
-        <div style={{ flex: 1 }}>
+      <div className={styles.container}>
+        <div className={styles.canvasContainer}>
           <CanvasArea
             elements={elements}
             setElements={setElements}
@@ -337,24 +387,18 @@ export default function YourPalace() {
           />
         </div>
 
-        <div className={styles.sidebar} style={{ width: 220 }}>
-          <div style={{ marginBottom: 12 }}>
-            <button onClick={handleSave} style={{ width: "100%", padding: 8, marginBottom: 8 }}>
-              💾 Speichern
-            </button>
-            <button
-              onClick={handleDeleteSelected}
-              style={{ width: "100%", padding: 8 }}
-              disabled={!selected}
-            >
+        <div className={styles.sidebar}>
+          <div className={styles.sidebarButtons}>
+            <button onClick={handleSave}>💾 Speichern</button>
+            <button onClick={handleDeleteSelected} disabled={!selected}>
               🗑️ Löschen
             </button>
           </div>
 
           {SIDEBAR_ITEMS.map((section) => (
-            <div className={styles.section} key={section.section} style={{ marginBottom: 8 }}>
-              <div style={{ fontWeight: "600", marginBottom: 6 }}>{section.section}</div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div className={styles.section} key={section.section}>
+              <div className={styles.sectionTitle}>{section.section}</div>
+              <div className={styles.itemGrid}>
                 {section.items.map((item) => (
                   <DraggableItem key={`${item.icon}-${item.variant || "default"}`} {...item} />
                 ))}
@@ -362,11 +406,9 @@ export default function YourPalace() {
             </div>
           ))}
 
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 12, color: "#666" }}>
-              Hinweis: Implementiere auf dem Server einen Endpunkt <code>/api/save-palace</code>,
-              um das JSON in deine MySQL-DB zu schreiben.
-            </div>
+          <div className={styles.sidebarHint}>
+            Hinweis: Implementiere auf dem Server einen Endpunkt <code>/api/save-palace</code>,
+            um das JSON in deine MySQL-DB zu schreiben.
           </div>
         </div>
       </div>
