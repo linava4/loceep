@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import styles from "./page.module.css";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 
 export default function Home() {
@@ -12,6 +12,12 @@ export default function Home() {
     const y = infoRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
     window.scrollTo({ top: y, behavior: 'smooth' });
   };
+
+   useEffect(() => {
+      const data = fetch('/api/posts')
+      const response = data.then(res => res.json())
+      console.log(response)
+    }, [])
 
   return (
     <div className={styles.pageContainer}>

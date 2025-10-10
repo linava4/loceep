@@ -44,6 +44,8 @@ function FAQItem({ question, answer }) {
   );
 }
 
+
+
 export default function FAQPage() {
   return (
     <div className={styles.container}>
