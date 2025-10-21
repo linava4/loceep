@@ -309,6 +309,42 @@ function CanvasArea({ elements, setElements, selected, setSelected, getNextRoomI
 export default function YourPalace() {
   const [elements, setElements] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS); // <--- hier hinzugefügt
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const res = await fetch("/api/rooms");
+        if (!res.ok) throw new Error("Fehler beim Laden der Räume");
+        const data = await res.json();
+
+        // Daten aus DB transformieren
+        const dbRooms = data.map((room) => ({
+          type: ItemTypes.ROOM,
+          icon: room.ICON, // icon von db?
+          width: Number(room.WIDTH) * GRID_SIZE,
+          height: Number(room.HEIGHT) * GRID_SIZE,
+          variant: room.ROOM_ID, // 
+        }));
+
+        console.log("Geladene Räume aus DB:", dbRooms);
+
+        // Setze die neuen Sidebar-Items
+        setSidebarItems((prev) => {
+          // wir ersetzen nur die "Räume"-Sektion
+          return prev.map((section) =>
+            section.section === "Räume"
+              ? { ...section, items: dbRooms }
+              : section
+          );
+        });
+      } catch (err) {
+        console.error("Fehler beim Fetchen der Räume:", err);
+      }
+    };
+
+    fetchRooms();
+  }, []);
 
   //Verfügbare Raum IDs pro Variante
   const [availableRoomIds, setAvailableRoomIds] = useState({
@@ -319,14 +355,19 @@ export default function YourPalace() {
 
   //gibt die nächste verfügbare Raum ID zurück und entfernt sie aus dem Pool
   const getNextRoomId = (variant) => {
-    const ids = availableRoomIds[variant];
-    const baseId = ids && ids.length > 0 ? ids[0] : Math.floor(Math.random() * 1000);
-    setAvailableRoomIds((prev) => ({
-      ...prev,
-      [variant]: prev[variant].slice(1),
-    }));
-    return `room-${variant}-${baseId}-${Date.now()}`;
-  };
+  // Fallback: Wenn variant nicht existiert oder nicht 1, 2, 3 ist → 1
+  const safeVariant = [1, 2, 3].includes(Number(variant)) ? Number(variant) : 1;
+  const ids = availableRoomIds[safeVariant] || [];
+  const baseId =
+    ids.length > 0 ? ids[0] : Math.floor(Math.random() * 1000);
+
+  setAvailableRoomIds((prev) => ({
+    ...prev,
+    [safeVariant]: (prev[safeVariant] || []).slice(1),
+  }));
+
+  return `room-${safeVariant}-${baseId}-${Date.now()}`;
+};
 
   //gibt eine Raum ID zurück in den Pool wenn ein Raum gelöscht wird
   const releaseRoomId = (id) => {
@@ -358,7 +399,10 @@ export default function YourPalace() {
   const handleSave = async () => {
     const rooms = elements.filter((el) => el.type === ItemTypes.ROOM);
     const objects = elements.filter((el) => el.type !== ItemTypes.ROOM);
-    const payload = { rooms, objects, savedAt: new Date().toISOString() };
+    const payload = { rooms, objects, savedAt: new Date().toISOString().slice(0, 23).replace("T", " ") };
+
+    console.log("Speicher-Payload:", payload);
+
     try {
       const res = await fetch("/api/save-palace", {
         method: "POST",
@@ -395,7 +439,7 @@ export default function YourPalace() {
             </button>
           </div>
 
-          {SIDEBAR_ITEMS.map((section) => (
+          {sidebarItems.map((section) => (
             <div className={styles.section} key={section.section}>
               <div className={styles.sectionTitle}>{section.section}</div>
               <div className={styles.itemGrid}>
