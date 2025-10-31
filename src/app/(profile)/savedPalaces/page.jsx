@@ -12,24 +12,33 @@ const ItemList = () => {
   // Beispiel: Daten aus der Datenbank laden (hier Dummy)
   useEffect(() => {
     const fetchData = async () => {
-      // Später replace mit Axios oder Fetch aus DB
-      const data = [
-        { id: 1, name: "MindPalace1" },
-        { id: 2, name: "MindPalace2" },
-        { id: 3, name: "MindPalace3" },
-      ];
-      setItems(data);
+      try {
+        const res = await fetch('/api/load-palace');
+        const data = await res.json();
+
+        const dbPalaces = data.map((palace) => ({
+          id: palace.PALACE_ID,
+          name: palace.NAME,
+        }));
+
+        console.log("Geladene Items:", dbPalaces);
+
+        setItems(dbPalaces);
+      } catch (error) {
+        console.error("Fehler beim Laden der Paläste:", error);
+      }
     };
     fetchData();
+    
   }, []);
 
-  const handleSelect = (id) => {
-    console.log("Ausgewählt:", id);
+  const handleSelect = (PALACE_ID) => {
+    console.log("Ausgewählt:", PALACE_ID);
     // später: DB Update oder State ändern
   };
 
-  const handleDelete = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const handleDelete = (PALACE_ID) => {
+    setItems((prev) => prev.filter((item) => item.PALACE_ID !== PALACE_ID));
     // später: DB Löschung
   };
 

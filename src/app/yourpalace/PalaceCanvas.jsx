@@ -360,7 +360,38 @@ export default function YourPalace() {
       }
     };
 
+    const fetchObjects = async () => {
+      try {
+        const res = await fetch("/api/objects");
+        if (!res.ok) throw new Error("Fehler beim Laden der Objekte");
+        const data = await res.json();
+
+        // Daten aus DB transformieren
+        const dbObjects = data.map((object) => ({
+          type: ItemTypes.OBJECT,
+          icon: object.ICON,
+          width: Number(object.WIDTH),
+          height: Number(object.HEIGHT),
+          variant: object.OBECT_ID,
+        }));
+
+        console.log("Geladene Objekte aus DB:", dbObjects);
+
+        // Setze die neuen Sidebar-Items
+        setSidebarItems((prev) => {
+          return prev.map((section) =>
+            section.section === "Objekte"
+              ? { ...section, items: dbObjects}
+              : section
+          );
+        });
+      } catch (err) {
+        console.error("Fehler beim Fetchen der Objekte:", err);
+      }
+    };
+
     fetchRooms();
+    fetchObjects();
   }, []);
 
   //Verfügbare Raum IDs pro Variante
@@ -428,10 +459,9 @@ export default function YourPalace() {
     console.log("Speicher-Payload:", payload);
 
     try {
-      const checkRes = await fetch(`/api/palace-exists?name=${encodeURIComponent(name)}`);
-      const exists = checkRes.ok ? await checkRes.json() : false;
+      
 
-      const method = exists?.exists ? "PUT" : "POST";
+      const method =  "POST";
 
       const res = await fetch("/api/save-palace", {
         method,
@@ -441,7 +471,7 @@ export default function YourPalace() {
       if (!res.ok) throw new Error(await res.text());
 
       setUnsavedChanges(false);
-      alert(`Palast erfolgreich ${exists?.exists ? "aktualisiert" : "gespeichert"}!`);
+      alert(`Palast erfolgreich gespeichert!`);
     } catch (err) {
       console.error(err);
       alert("Fehler beim Speichern. Sieh in die Konsole.");
@@ -495,8 +525,7 @@ export default function YourPalace() {
           ))}
 
           <div className={styles.sidebarHint}>
-            Hinweis: Implementiere auf dem Server einen Endpunkt <code>/api/save-palace</code> sowie <code>/api/palace-exists</code>, um Updates und Inserts korrekt zu handhaben.
-          </div>
+            </div>
         </div>
       </div>
     </DndProvider>
