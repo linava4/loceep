@@ -459,15 +459,30 @@ export default function YourPalace() {
     console.log("Speicher-Payload:", payload);
 
     try {
-      
+      const method = "POST";
 
-      const method =  "POST";
+      //Prüfen, ob Palastname bereits existiert
+      const checkRes = await fetch(`/api/palace-exists?name=${encodeURIComponent(payload.name)}`);
+      const checkData = await checkRes.json();
 
+      if (checkData.exists) {
+        const overwrite = confirm(
+          `Ein Palast mit dem Namen "${payload.name}" existiert bereits. Möchten Sie ihn überschreiben?`
+        );
+
+        if (!overwrite) {
+          alert("Sie müssen dem Palast einen anderen neuen Namen geben.");
+          return; // Vorgang abbrechen
+        }
+      }
+
+      // Palast speichern (Teilhistorisierung erfolgt im Backend)
       const res = await fetch("/api/save-palace", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload), // payload enthält Name, Räume, Objekte, savedAt
       });
+
       if (!res.ok) throw new Error(await res.text());
 
       setUnsavedChanges(false);

@@ -13,7 +13,7 @@ const ItemList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/load-palace');
+        const res = await fetch('/api/palace-list');
         const data = await res.json();
 
         const dbPalaces = data.map((palace) => ({
