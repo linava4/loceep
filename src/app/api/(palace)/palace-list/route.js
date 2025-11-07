@@ -5,9 +5,10 @@ export async function GET() {
   try {
     const db = await createConnection();
     const sql = `
-        SELECT NAME,PALACE_ID
+        SELECT *
         FROM palace
-        WHERE USER_ID = 1
+        WHERE USER_ID = 1 AND ACTIVE = TRUE
+        ORDER BY CREATED_AT DESC
         `;
 
     const [palaces] = await db.query(sql);

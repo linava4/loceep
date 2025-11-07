@@ -2,14 +2,15 @@ import { createConnection } from "@/lib/db.js";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
-  // SQL-Konstanten
+  // SQL-Konstanten PALACE
   const existsPalace =
     "SELECT PALACE_ID FROM palace WHERE NAME = ? AND USER_ID = ?";
   const newPalace =
-    "INSERT INTO palace (NAME, USER_ID, TEMPLATE, CREATED_AT) VALUES (?, ?, ?, ?)";
+    "INSERT INTO palace (NAME, USER_ID, TEMPLATE, CREATED_AT, ACTIVE) VALUES (?, ?, ?, ?, TRUE)";
   const updatePalace =
     "UPDATE palace SET UPDATED_AT = ? WHERE PALACE_ID = ?";
-
+ 
+  // SQL-Konstanten PALACE_ROOM
   const existsRoom =
     "SELECT PALACE_ROOM_ID, POS_X, POS_Y FROM palace_room WHERE PALACE_ID = ? AND IDENTIFIER = ? AND ACTIVE = 1";
   const updateRoom =
@@ -23,6 +24,7 @@ export async function POST(request) {
   const newRoom =
     "INSERT INTO palace_room (PALACE_ID, ROOM_ID, POS_X, POS_Y, IDENTIFIER, VALID_FROM, ACTIVE) VALUES (?, ?, ?, ?, ?, NOW(), TRUE)";
 
+  // SQL-Konstanten ROOM_ANCHOR
   const existsObjects =
     "SELECT ROOM_ANCHOR_ID, POS_X, POS_Y FROM room_anchor WHERE PALACE_ID = ? AND ROOM_ID = ? AND IDENTIFIER = ? AND ACTIVE = TRUE";
   const updateObjects =
@@ -36,6 +38,7 @@ export async function POST(request) {
   const newObjects =
     "INSERT INTO room_anchor (PALACE_ID, ROOM_ID, ANCHOR_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, 1, ?, ?, NOW(), TRUE, ?)";
 
+  // Hauptlogik
   try {
     const db = await createConnection();
     const { name, rooms, objects, savedAt } = await request.json();

@@ -34,13 +34,34 @@ const ItemList = () => {
 
   const handleSelect = (PALACE_ID) => {
     console.log("Ausgewählt:", PALACE_ID);
-    // später: DB Update oder State ändern
+    
   };
 
-  const handleDelete = (PALACE_ID) => {
-    setItems((prev) => prev.filter((item) => item.PALACE_ID !== PALACE_ID));
-    // später: DB Löschung
-  };
+  const handleDelete = async (palaceId) => {
+  //aus UI entfernen (optimistic update)
+  setItems((prev) => prev.filter((item) => item.id !== palaceId));
+
+  try {
+    const res = await fetch("/api/delete-palace", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ palaceId }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Fehler beim Löschen (Status ${res.status})`);
+    }
+
+    const data = await res.json();
+    console.log("Palast gelöscht:", data.message);
+  } catch (err) {
+    console.error("Fehler beim Löschen:", err);
+
+    // UI zurücksetzen, falls Fehler
+    setItems((prev) => [...prev, items.find((i) => i.id === palaceId)]);
+    alert("Löschen fehlgeschlagen!");
+  }
+};
 
   return (
     <div className={style.container}>
