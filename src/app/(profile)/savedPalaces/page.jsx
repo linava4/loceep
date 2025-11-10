@@ -32,10 +32,22 @@ const ItemList = () => {
     
   }, []);
 
-  const handleSelect = (PALACE_ID) => {
-    console.log("Ausgewählt:", PALACE_ID);
-    
-  };
+ const handleSelect = async (palaceId) => {
+  try {
+    const res = await fetch(`/api/load-palace?palaceId=${palaceId}`);
+    if (!res.ok) throw new Error("Fehler beim Laden");
+    const data = await res.json();
+    console.log("Palastdaten:", data);
+
+    localStorage.setItem("selectedPalace", JSON.stringify(data));
+
+    // Weiterleitung zur Canvas-Seite
+    window.location.href = "/yourpalace";
+  } catch (err) {
+    console.error("Fehler beim Laden des Palastes:", err);
+  }
+};
+
 
   const handleDelete = async (palaceId) => {
   //aus UI entfernen (optimistic update)
