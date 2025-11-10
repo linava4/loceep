@@ -1,3 +1,4 @@
+// index.js
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,20 +8,42 @@ import CanvasArea from "./CanvasArea";
 import DraggableItem from "./DraggableItem";
 import { ItemTypes, GRID_SIZE, SIDEBAR_ITEMS } from "./constants";
 import styles from "./styles.module.css";
+import usePalaceManager from "./usePalaceManager";
 
 export default function YourPalace() {
-  const [elements, setElements] = useState([]);
+  const {
+    elements,
+    setElements,
+    palaceName,
+    setPalaceName,
+    loadPalaceFromId,
+    getNextRoomId,
+    releaseRoomId,
+  } = usePalaceManager();
+
   const [selected, setSelected] = useState(null);
   const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
-  const [palaceName, setPalaceName] = useState("");
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
-  //Markiere Änderungen
+  useEffect(() => {
+    const storedId = localStorage.getItem("palaceId");
+    if (storedId) {
+      try {
+        const id = JSON.parse(storedId);
+        if (id){
+            data = loadPalaceFromId(id);
+            console.log("Geladene Palastdaten:", data);
+        } 
+      } catch (e) {
+        console.error("Fehler beim Lesen der palaceId", e);
+      }
+    }
+  }, [loadPalaceFromId]);
+
   useEffect(() => {
     setUnsavedChanges(true);
   }, [elements]);
 
-  //Warnung beim Tab-Schließen
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (unsavedChanges) {
@@ -32,7 +55,6 @@ export default function YourPalace() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [unsavedChanges]);
 
-  // Räume & Objekte aus DB laden
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -47,8 +69,6 @@ export default function YourPalace() {
           height: Number(room.HEIGHT) * GRID_SIZE,
           variant: room.ROOM_ID,
         }));
-
-        console.log("Geladene Räume aus DB:", dbRooms);
 
         setSidebarItems((prev) =>
           prev.map((section) =>
@@ -74,8 +94,6 @@ export default function YourPalace() {
           variant: object.OBJECT_ID,
         }));
 
-        console.log("Geladene Objekte aus DB:", dbObjects);
-
         setSidebarItems((prev) =>
           prev.map((section) =>
             section.section === "Objekte" ? { ...section, items: dbObjects } : section
@@ -90,47 +108,9 @@ export default function YourPalace() {
     fetchObjects();
   }, []);
 
-  //Verfügbare Raum IDs pro Variante
-  const [availableRoomIds, setAvailableRoomIds] = useState({
-    1: Array.from({ length: 10 }, (_, i) => 10 + i),
-    2: Array.from({ length: 10 }, (_, i) => 20 + i),
-    3: Array.from({ length: 10 }, (_, i) => 30 + i),
-  });
-
-  const getNextRoomId = (variant) => {
-    const safeVariant = [1, 2, 3].includes(Number(variant)) ? Number(variant) : 1;
-    const ids = availableRoomIds[safeVariant] || [];
-    const baseId = ids.length > 0 ? ids[0] : Math.floor(Math.random() * 1000);
-
-    setAvailableRoomIds((prev) => ({
-      ...prev,
-      [safeVariant]: (prev[safeVariant] || []).slice(1),
-    }));
-
-    return `room-${safeVariant}-${baseId}-${Date.now()}`;
-  };
-
-  const releaseRoomId = (id) => {
-    const match = id.match(/^room-(\d)-(\d+)/);
-    if (!match) return;
-    const variant = Number(match[1]);
-    const numId = Number(match[2]);
-    setAvailableRoomIds((prev) => ({
-      ...prev,
-      [variant]: [...prev[variant], numId].sort((a, b) => a - b),
-    }));
-  };
-
   const handleDeleteSelected = () => {
     if (!selected) return;
-    if (selected.type === ItemTypes.ROOM) {
-      releaseRoomId(selected.id);
-      setElements((prev) =>
-        prev.filter((el) => el.id !== selected.id && el.roomId !== selected.id)
-      );
-    } else {
-      setElements((prev) => prev.filter((el) => el.id !== selected.id));
-    }
+    setElements((prev) => prev.filter((el) => el.id !== selected.id));
     setSelected(null);
   };
 
@@ -151,8 +131,6 @@ export default function YourPalace() {
       savedAt: new Date().toISOString().slice(0, 23).replace("T", " "),
     };
 
-    console.log("Speicher-Payload:", payload);
-
     try {
       const checkRes = await fetch(`/api/palace-exists?name=${encodeURIComponent(payload.name)}`);
       const checkData = await checkRes.json();
@@ -161,10 +139,7 @@ export default function YourPalace() {
         const overwrite = confirm(
           `Ein Palast mit dem Namen "${payload.name}" existiert bereits. Möchten Sie ihn überschreiben?`
         );
-        if (!overwrite) {
-          alert("Sie müssen dem Palast einen anderen neuen Namen geben.");
-          return;
-        }
+        if (!overwrite) return alert("Sie müssen dem Palast einen anderen neuen Namen geben.");
       }
 
       const res = await fetch("/api/save-palace", {
@@ -192,11 +167,11 @@ export default function YourPalace() {
             selected={selected}
             setSelected={setSelected}
             getNextRoomId={getNextRoomId}
+            releaseRoomId={releaseRoomId}
           />
         </div>
 
         <div className={styles.sidebar}>
-          {/* Palastname-Eingabe */}
           <div className={styles.palaceNameInput}>
             <label>
               Palastname:{" "}

@@ -6,12 +6,7 @@
   gap: 12px;
 }
 
-.canvasContainer {
-  flex: 1 1 auto; /* flexibel wachsen und schrumpfen */
-  min-width: 0;    /* erlaubt das Schrumpfen */
-  min-height: 0;   /* erlaubt das Schrumpfen */
-}
-
+/* --- SIDEBAR --- */
 .sidebar {
   width: 220px;
   background: #d0d7b3;
@@ -40,26 +35,39 @@
   cursor: not-allowed;
 }
 
+/* --- CANVAS CONTAINER DIE GANZE VERFÜGBARE FLÄCHE!!! --- */
+.canvasContainer {
+  flex: 1 1 auto;
+  min-width: 0;      /* verhindert, dass Flexbox zu groß / zu klein wird */
+  min-height: 0;
+  display: flex;
+}
+
+/* --- WRAPPER DARIN MUSS FLEX 1 SEIN! --- */
 .canvasWrapper {
-  flex: 1 1 auto;        /* kann wachsen und schrumpfen */
-  min-width: 0;          /* zwingt Flexbox zum Shrink */
-  min-height: 0;         /* zwingt Flexbox zum Shrink */
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  
+  /* wichtige Fixes */
   background: #f5f6eb;
   margin: 10px;
   border-radius: 10px;
+  overflow: hidden;  /* Canvas bleibt sauber eingepasst */
   position: relative;
-  overflow: hidden;
 }
+
+/* --- DAS CANVAS SELBST MUSS *100%* DES WRAPPERS EINNEHMEN! --- */
 .canvas {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-
+/* --- ITEM STYLES --- */
 .section {
   display: flex;
   flex-direction: column;
