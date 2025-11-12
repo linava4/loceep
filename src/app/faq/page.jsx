@@ -5,24 +5,24 @@ import styles from "./page.module.css";
 
 const FAQS = [
   {
-    question: "Was ist ein Gedächtnispalast?",
+    question: "What is a memory palace?",
     answer:
-      "Ein Gedächtnispalast ist eine Methode, um Informationen durch räumliche Vorstellungskraft besser zu merken.",
+      "A memory palace is a method that helps you remember information better by using spatial visualization.",
   },
   {
-    question: "Wie kann ich Räume und Objekte hinzufügen?",
+    question: "How can I add rooms and objects?",
     answer:
-      "Ziehe einfach die gewünschten Icons aus der Seitenleiste auf die Leinwand.",
+      "Simply drag the desired icons from the sidebar onto the canvas.",
   },
   {
-    question: "Was ist Loceep?",
+    question: "What is Loceep?",
     answer:
-      "Eine Plattform, um deinen eigenen Gedächtnispalast zu erstellen und zu verwalten.",
+      "A platform that allows you to create and manage your own memory palace.",
   },
   {
-    question: "Kann ich meinen Palast speichern?",
+    question: "Can I save my palace?",
     answer:
-      "Eine Speicherfunktion ist geplant. Aktuell bleiben die Daten nur während der Sitzung erhalten.",
+      "Yes, you can save your palace and load it later for further editing.",
   },
 ];
 
@@ -44,12 +44,10 @@ function FAQItem({ question, answer }) {
   );
 }
 
-
-
 export default function FAQPage() {
   return (
     <div className={styles.container}>
-      <br/>
+      <br />
       <h2>FAQ</h2>
       <div className={styles.faqList}>
         {FAQS.map((faq) => (

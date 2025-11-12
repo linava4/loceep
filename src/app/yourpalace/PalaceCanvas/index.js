@@ -48,7 +48,7 @@ export default function YourPalace() {
     const handleBeforeUnload = (e) => {
       if (unsavedChanges) {
         e.preventDefault();
-        e.returnValue = "Möchtest du deinen Palast wirklich schließen, ohne zu speichern?";
+        e.returnValue = "Want to leave? Unsaved changes will be lost.";
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -72,7 +72,7 @@ export default function YourPalace() {
 
         setSidebarItems((prev) =>
           prev.map((section) =>
-            section.section === "Räume" ? { ...section, items: dbRooms } : section
+            section.section === "Rooms" ? { ...section, items: dbRooms } : section
           )
         );
       } catch (err) {
@@ -80,32 +80,32 @@ export default function YourPalace() {
       }
     };
 
-    const fetchObjects = async () => {
+    const fetchAnchors = async () => {
       try {
-        const res = await fetch("/api/objects");
-        if (!res.ok) throw new Error("Fehler beim Laden der Objekte");
+        const res = await fetch("/api/anchors");
+        if (!res.ok) throw new Error("Fehler beim Laden der Anker");
         const data = await res.json();
 
-        const dbObjects = data.map((object) => ({
-          type: ItemTypes.OBJECT,
-          icon: object.ICON,
-          width: Number(object.WIDTH),
-          height: Number(object.HEIGHT),
-          variant: object.OBJECT_ID,
+        const dbAnchors = data.map((anchor) => ({
+          type: ItemTypes.ANCHOR,
+          icon: anchor.ICON,
+          width: Number(anchor.WIDTH),
+          height: Number(anchor.HEIGHT),
+          variant: anchor.ANCHOR_ID,
         }));
 
         setSidebarItems((prev) =>
           prev.map((section) =>
-            section.section === "Objekte" ? { ...section, items: dbObjects } : section
+            section.section === "Anchors" ? { ...section, items: dbAnchors } : section
           )
         );
       } catch (err) {
-        console.error("Fehler beim Fetchen der Objekte:", err);
+        console.error("Fehler beim Fetchen der Anker:", err);
       }
     };
 
     fetchRooms();
-    fetchObjects();
+    fetchAnchors();
   }, []);
 
   const handleDeleteSelected = () => {
@@ -117,17 +117,17 @@ export default function YourPalace() {
   const handleSave = async () => {
     let name = palaceName.trim();
     if (!name) {
-      name = prompt("Bitte gib deinem Palast einen Namen:");
-      if (!name) return alert("Speichern abgebrochen – kein Name eingegeben.");
+      name = prompt("Please name your palace:");
+      if (!name) return alert("Coulnd't safe – no palace name.");
       setPalaceName(name);
     }
 
     const rooms = elements.filter((el) => el.type === ItemTypes.ROOM);
-    const objects = elements.filter((el) => el.type !== ItemTypes.ROOM);
+    const anchors = elements.filter((el) => el.type !== ItemTypes.ROOM);
     const payload = {
       name,
       rooms,
-      objects,
+      anchors,
       savedAt: new Date().toISOString().slice(0, 23).replace("T", " "),
     };
 
@@ -137,9 +137,9 @@ export default function YourPalace() {
 
       if (checkData.exists) {
         const overwrite = confirm(
-          `Ein Palast mit dem Namen "${payload.name}" existiert bereits. Möchten Sie ihn überschreiben?`
+          `A palace with the name "${payload.name}" already exists. Overwrite?`
         );
-        if (!overwrite) return alert("Sie müssen dem Palast einen anderen neuen Namen geben.");
+        if (!overwrite) return alert("Please name your palace differently to save.");
       }
 
       const res = await fetch("/api/save-palace", {
@@ -150,7 +150,7 @@ export default function YourPalace() {
 
       if (!res.ok) throw new Error(await res.text());
       setUnsavedChanges(false);
-      alert("Palast erfolgreich gespeichert!");
+      alert("Palace saved successfully!");
     } catch (err) {
       console.error(err);
       alert("Fehler beim Speichern. Sieh in die Konsole.");
@@ -174,20 +174,20 @@ export default function YourPalace() {
         <div className={styles.sidebar}>
           <div className={styles.palaceNameInput}>
             <label>
-              Palastname:{" "}
+              Name:{" "}
               <input
                 type="text"
                 value={palaceName}
                 onChange={(e) => setPalaceName(e.target.value)}
-                placeholder="Mein Gedächtnispalast"
+                placeholder="my awesome palace"
               />
             </label>
           </div>
 
           <div className={styles.sidebarButtons}>
-            <button onClick={handleSave}>💾 Speichern</button>
+            <button onClick={handleSave}>Save</button>
             <button onClick={handleDeleteSelected} disabled={!selected}>
-              🗑️ Löschen
+              Delete
             </button>
           </div>
 

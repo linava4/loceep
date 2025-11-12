@@ -23,7 +23,7 @@ export default function CanvasArea({ elements, setElements, selected, setSelecte
     return () => observer.disconnect();
   }, []);
 
-  // Drag & Drop für Räume und Objekte
+  // Drag & Drop für Räume und Anker
   const [, drop] = useDrop(() => ({
     accept: Object.values(ItemTypes),
     drop: (item, monitor) => {
@@ -59,25 +59,25 @@ export default function CanvasArea({ elements, setElements, selected, setSelecte
       if (room) {
         const relX = pos.x - room.x;
         const relY = pos.y - room.y;
-        const newObj = {
-          id: `obj-${Math.floor(Math.random() * 10000)}-${Date.now()}`,
+        const newAnch = {
+          id: `anch-${Math.floor(Math.random() * 10000)}-${Date.now()}`,
           type: item.type,
           icon: item.icon,
           x: relX,
           y: relY,
           roomId: room.id,
         };
-        setElements((prev) => [...prev, newObj]);
+        setElements((prev) => [...prev, newAnch]);
       } else {
-        const newObj = {
-          id: `obj-${Math.floor(Math.random() * 10000)}-${Date.now()}`,
+        const newAnch = {
+          id: `anch-${Math.floor(Math.random() * 10000)}-${Date.now()}`,
           type: item.type,
           icon: item.icon,
           x: pos.x,
           y: pos.y,
           roomId: null,
         };
-        setElements((prev) => [...prev, newObj]);
+        setElements((prev) => [...prev, newAnch]);
       }
     },
   }));
@@ -151,20 +151,20 @@ export default function CanvasArea({ elements, setElements, selected, setSelecte
                     stroke={selected?.id === room.id ? "lightgreen" : "black"}
                   />
                   {elements
-                    .filter((obj) => obj.roomId === room.id)
-                    .map((obj) => (
+                    .filter((anch) => anch.roomId === room.id)
+                    .map((anch) => (
                       <Text
-                        key={`${obj.type}-${obj.id}`}
-                        x={obj.x}
-                        y={obj.y}
-                        text={obj.icon}
+                        key={`${anch.type}-${anch.id}`}
+                        x={anch.x}
+                        y={anch.y}
+                        text={anch.icon}
                         fontSize={32}
                         draggable
                         onDragStart={(e) => (e.cancelBubble = true)}
-                        onDragEnd={(e) => handleDragEnd(e, obj.id, obj.type)}
+                        onDragEnd={(e) => handleDragEnd(e, anch.id, anch.type)}
                         onClick={(e) => {
                           e.cancelBubble = true;
-                          setSelected({ id: obj.id, type: obj.type });
+                          setSelected({ id: anch.id, type: anch.type });
                         }}
                       />
                     ))}
@@ -172,7 +172,7 @@ export default function CanvasArea({ elements, setElements, selected, setSelecte
               ))}
           </Layer>
 
-          {/* Freistehende Objekte */}
+          {/* Freistehende Anker */}
           <Layer>
             {elements
               .filter((el) => el.type !== ItemTypes.ROOM && !el.roomId)

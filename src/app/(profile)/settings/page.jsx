@@ -28,7 +28,6 @@ const Profile = () => {
             <option value="">Select a language</option>
             <option value="en">English</option>
             <option value="de">Deutsch</option>
-            <option value="fr">Français</option>
           </select>
 
           <p>Delete Account</p>

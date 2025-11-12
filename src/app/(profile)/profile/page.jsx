@@ -24,19 +24,19 @@ const Profile = () => {
         <h2>User Data</h2>
         <form className={style.form}>
           <p>Firstname</p>
-          <input type="text" placeholder='Firstname' className={style.input} required />
+          <input type="text" defaultValue="Lina" placeholder='Firstname' className={style.input} required />
 
           <p>Surname</p>
-          <input type="text" placeholder='Surname' className={style.input} required />
+          <input type="text" defaultValue="Varch" placeholder='Surname' className={style.input} required />
 
           <p>Gender</p>
-          <input type="text" placeholder='Gender' className={style.input} required />
+          <input type="text" defaultValue="female" placeholder='Gender' className={style.input} required />
 
           <p>Birthdate</p>
-          <input type="date" className={style.input} required />
+          <input type="date" defaultValue="2005-06-08" className={style.input} required />
 
           <p>E-mail</p>
-          <input type="email" placeholder='E-mail' className={style.input} required />
+          <input type="email" defaultValue="lina@gmail.com" placeholder='E-mail' className={style.input} required />
 
           <button type="submit">Save changes</button>
         </form>

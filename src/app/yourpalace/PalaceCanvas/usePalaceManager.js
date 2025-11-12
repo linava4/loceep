@@ -82,60 +82,53 @@ export default function usePalaceManager() {
     }
 
     const rawRooms = data.rooms || [];
-    const rawObjects = data.objects || [];
+    const rawAnchors = data.anchors || [];
+
+    console.log("Rohdaten laden:", { rawRooms, rawAnchors });
 
     const rooms = rawRooms.map((room) => {
       // bevorzugte Felder, Fallbacks
-      const identifier = room.IDENTIFIER ?? room.id ?? room.identifier ?? null;
-      const variant = Number(room.ROOM_ID ?? room.ROOMID ?? room.variant ?? 1);
-      const posX = Number(room.POS_X ?? room.pos_x ?? room.x ?? 0);
-      const posY = Number(room.POS_Y ?? room.pos_y ?? room.y ?? 0);
+
+
+      const identifier = room.IDENTIFIER ?? null;
+      const variant = Number(room.ROOM_ID ?? 1);
+      const posX = Number(room.POS_X ?? 0);
+      const posY = Number(room.POS_Y ?? 0);
 
       return {
         id: identifier ?? getNextRoomId(variant),
         type: ItemTypes.ROOM,
-        icon: room.ICON ?? getRoomIcon(variant),
+        icon: room.ICON,
         x: posX,
         y: posY,
-        width: getRoomWidth(variant),
-        height: getRoomHeight(variant),
+        width: getRoomSize(room.WIDTH),
+        height: getRoomSize(room.HEIGHT),
         variant,
       };
     });
 
-    const objects = rawObjects.map((obj) => {
-      const identifier = obj.IDENTIFIER ?? obj.id ?? obj.identifier ?? null;
-      const posX = Number(obj.POS_X ?? obj.pos_x ?? obj.x ?? 0);
-      const posY = Number(obj.POS_Y ?? obj.pos_y ?? obj.y ?? 0);
+    const anchors = rawAnchors.map((anch) => {
+      const identifier = anch.IDENTIFIER ?? null;
+      const posX = Number(anch.POS_X ?? 0);
+      const posY = Number(anch.POS_Y ?? 0);
 
       // bestimme roomId: entweder ein vollständiger identifier oder eine Zahl -> mappe zu room-<num>
-      let roomId = null;
-      if (obj.ROOM_IDENTIFIER) {
-        roomId = obj.ROOM_IDENTIFIER;
-      } else if (obj.ROOM_ID) {
-        // Falls DB nur numerische Room_ID liefert, versuchen wir das Format room-<variant>-<num>-<ts> nicht zu rekonstruieren.
-        // Viele DBs speichern nur die relation (z.B. ROOM_ID = the room identifier), passe an falls nötig.
-        roomId = typeof obj.ROOM_ID === "string" && obj.ROOM_ID.startsWith("room-")
-          ? obj.ROOM_ID
-          : `room-${obj.ROOM_ID}`;
-      } else if (obj.ROOM) {
-        roomId = obj.ROOM;
-      }
+      
 
       return {
-        id: identifier ?? `obj-${Math.random().toString(36).slice(2, 9)}-${Date.now()}`,
-        type: ItemTypes.OBJECT,
-        icon: obj.ICON ?? "🪑",
+        id: identifier ?? `anch-${Math.random().toString(36).slice(2, 9)}-${Date.now()}`,
+        type: ItemTypes.ANCHOR,
+        icon: anch.ICON,
         x: posX,
         y: posY,
-        width: Number(obj.WIDTH ?? 1),
-        height: Number(obj.HEIGHT ?? 1),
-        roomId,
-        variant: obj.OBJECT_ID ?? obj.object_id ?? null,
+        width: Number(anch.WIDTH ?? 1),
+        height: Number(anch.HEIGHT ?? 1),
+        roomId: anch.ROOM_ID ?? null,
+        variant: anch.ANCHOR_ID ?? null,
       };
     });
 
-    const merged = [...rooms, ...objects];
+    const merged = [...rooms, ...anchors];
     setElements(merged);
 
     // Palace meta (Name)
@@ -150,10 +143,7 @@ export default function usePalaceManager() {
 
   }, [getNextRoomId, setElements, setPalaceName]);
 
-  /**
-   * Lädt Palast-Daten von der API anhand einer palaceId.
-   * Erwartet die API-Antwort im Format, das loadPalaceFromData erwartet.
-   */
+  // Lade-Handler: lädt Palast-Daten von der API anhand der palaceId
   const loadPalaceFromId = useCallback(async (palaceId) => {
     if (!palaceId) {
       console.warn("loadPalaceFromId: keine palaceId übergeben");
@@ -184,33 +174,11 @@ export default function usePalaceManager() {
   };
 }
 
-/* -------------------------
-   Hilfsfunktionen
-   ------------------------- */
 
-const getRoomIcon = (roomId) => {
-  switch (Number(roomId)) {
-    case 1: return "🏠";
-    case 2: return "🏛️";
-    case 3: return "🏢";
-    default: return "🏠";
-  }
+
+
+const getRoomSize = (length) => {
+  return length * GRID_SIZE;
 };
 
-const getRoomWidth = (roomId) => {
-  switch (Number(roomId)) {
-    case 1: return GRID_SIZE;
-    case 2: return GRID_SIZE;
-    case 3: return GRID_SIZE * 2;
-    default: return GRID_SIZE;
-  }
-};
 
-const getRoomHeight = (roomId) => {
-  switch (Number(roomId)) {
-    case 1: return GRID_SIZE;
-    case 2: return GRID_SIZE * 2;
-    case 3: return GRID_SIZE * 2;
-    default: return GRID_SIZE;
-  }
-};

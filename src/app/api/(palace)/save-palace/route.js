@@ -25,23 +25,23 @@ export async function POST(request) {
     "INSERT INTO palace_room (PALACE_ID, ROOM_ID, POS_X, POS_Y, IDENTIFIER, VALID_FROM, ACTIVE) VALUES (?, ?, ?, ?, ?, NOW(), 1)";
 
   // SQL-Konstanten ROOM_ANCHOR
-  const existsObjects =
+  const existsAnchors =
     "SELECT ROOM_ANCHOR_ID, POS_X, POS_Y FROM room_anchor WHERE PALACE_ID = ? AND IDENTIFIER = ? AND ACTIVE = 1";
-  const updateObjects =
+  const updateAnchors =
     "UPDATE room_anchor SET VALID_TO = NOW(), ACTIVE = ? WHERE ROOM_ANCHOR_ID = ? AND PALACE_ID = ?";
-  const deactivateObjects = `
+  const deactivateAnchors = `
     UPDATE room_anchor
     SET VALID_TO = NOW(), ACTIVE = 0
     WHERE PALACE_ID = ? AND ACTIVE = 1
     AND IDENTIFIER NOT IN (?);
   `;
-  const newObjects =
+  const newAnchors =
     "INSERT INTO room_anchor (PALACE_ID, ROOM_ID, ANCHOR_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, 1, ?, ?, NOW(), 1, ?)";
 
   // Hauptlogik
   try {
     const db = await createConnection();
-    const { name, rooms, objects, savedAt } = await request.json();
+    const { name, rooms, anchors, savedAt } = await request.json();
 
     // Palast prüfen oder anlegen
     const [existingPalace] = await db.query(existsPalace, [name, 1]);
@@ -92,9 +92,9 @@ export async function POST(request) {
     }
 
     // Objekte (Teilhistorisierung)
-    if (objects?.length) {
-      for (const obj of objects) {
-        const [existingObj] = await db.query(existsObjects, [
+    if (anchors?.length) {
+      for (const obj of anchors) {
+        const [existingObj] = await db.query(existsAnchors, [
           palaceId,
           obj.id,
         ]);
@@ -109,13 +109,13 @@ export async function POST(request) {
 
           // Wenn Position geändert → Historisieren
           if (old.POS_X !== obj.x || old.POS_Y !== obj.y) {
-            await db.query(updateObjects, [
+            await db.query(updateAnchors, [
               0,
               old.ROOM_ANCHOR_ID,
               palaceId,
             ]);
 
-            await db.query(newObjects, [
+            await db.query(newAnchors, [
               palaceId,
               obj.roomId,
               obj.x,
@@ -125,7 +125,7 @@ export async function POST(request) {
           }
         } else {
           // Neuer Anker
-          await db.query(newObjects, [
+          await db.query(newAnchors, [
             palaceId,
             obj.roomId,
             obj.x,
@@ -136,8 +136,8 @@ export async function POST(request) {
       }
 
       // Entfernte Objekte deaktivieren
-      const anchorIds = objects.map((o) => o.id);
-      await db.query(deactivateObjects, [palaceId, anchorIds]);
+      const anchorIds = anchors.map((o) => o.id);
+      await db.query(deactivateAnchors, [palaceId, anchorIds]);
     }
 
     return NextResponse.json({ message: "Palast gespeichert", id: palaceId });
