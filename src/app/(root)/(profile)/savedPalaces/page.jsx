@@ -39,7 +39,7 @@ const ItemList = () => {
     const data = await res.json();
     console.log("Palastdaten:", data);
 
-    // ✅ Im LocalStorage speichern (oder über Context)
+    // Im LocalStorage speichern (oder über Context)
     localStorage.setItem("palaceId", JSON.stringify(palaceId));
 
     // Weiterleitung zur Canvas-Seite

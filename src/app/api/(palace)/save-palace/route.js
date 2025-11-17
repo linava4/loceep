@@ -1,8 +1,7 @@
 import { createConnection } from "@/lib/db.js";
 import { NextResponse } from "next/server";
 
-export async function POST(request) {
-  // SQL-Konstanten PALACE
+// SQL-Konstanten PALACE
   const existsPalace =
     "SELECT PALACE_ID FROM palace WHERE NAME = ? AND USER_ID = ?";
   const newPalace =
@@ -38,6 +37,9 @@ export async function POST(request) {
   const newAnchors =
     "INSERT INTO room_anchor (PALACE_ID, ROOM_ID, ANCHOR_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, 1, ?, ?, NOW(), 1, ?)";
 
+
+export async function POST(request) {
+  
   // Hauptlogik
   try {
     const db = await createConnection();

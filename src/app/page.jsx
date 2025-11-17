@@ -13,11 +13,7 @@ export default function Home() {
     window.scrollTo({ top: y, behavior: 'smooth' });
   };
 
-   useEffect(() => {
-      const data = fetch('/api/posts')
-      const response = data.then(res => res.json())
-      console.log(response)
-    }, [])
+   
 
   return (
     <div className={styles.pageContainer}>
