@@ -35,7 +35,7 @@ import { NextResponse } from "next/server";
     AND IDENTIFIER NOT IN (?);
   `;
   const newAnchors =
-    "INSERT INTO room_anchor (PALACE_ID, ROOM_ID, ANCHOR_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, 1, ?, ?, NOW(), 1, ?)";
+    "INSERT INTO room_anchor (PALACE_ID, ROOM_ID, ANCHOR_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, ?, ?, ?, NOW(), 1, ?)";
 
 
 export async function POST(request) {
@@ -120,6 +120,7 @@ export async function POST(request) {
             await db.query(newAnchors, [
               palaceId,
               obj.roomId,
+              obj.variant,
               obj.x,
               obj.y,
               obj.id,
@@ -130,6 +131,7 @@ export async function POST(request) {
           await db.query(newAnchors, [
             palaceId,
             obj.roomId,
+            obj.variant,
             obj.x,
             obj.y,
             obj.id,

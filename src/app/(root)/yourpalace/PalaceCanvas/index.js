@@ -25,6 +25,11 @@ export default function YourPalace() {
   const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
+  // Neuer State: Connections + UI Toggles
+  const [connections, setConnections] = useState([]);
+  const [connectionMode, setConnectionMode] = useState(false); // wenn true: Verbindungsmodus aktiv
+  const [showConnections, setShowConnections] = useState(true); // sichtbar / unsichtbar
+
   useEffect(() => {
     const storedId = localStorage.getItem("palaceId");
     if (storedId) {
@@ -33,7 +38,7 @@ export default function YourPalace() {
         if (id){
             data = loadPalaceFromId(id);
             console.log("Geladene Palastdaten:", data);
-        } 
+        }
       } catch (e) {
         console.error("Fehler beim Lesen der palaceId", e);
       }
@@ -42,7 +47,7 @@ export default function YourPalace() {
 
   useEffect(() => {
     setUnsavedChanges(true);
-  }, [elements]);
+  }, [elements, connections]);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -94,6 +99,8 @@ export default function YourPalace() {
           variant: anchor.ANCHOR_ID,
         }));
 
+        console.log("Geladene Anker aus DB:", dbAnchors);
+
         setSidebarItems((prev) =>
           prev.map((section) =>
             section.section === "Anchors" ? { ...section, items: dbAnchors } : section
@@ -110,6 +117,8 @@ export default function YourPalace() {
 
   const handleDeleteSelected = () => {
     if (!selected) return;
+    // Wenn ein Ank mit Verbindungen gelöscht wird, entferne auch Verbindungen
+    setConnections((prev) => prev.filter((c) => c.fromId !== selected.id && c.toId !== selected.id));
     setElements((prev) => prev.filter((el) => el.id !== selected.id));
     setSelected(null);
   };
@@ -128,8 +137,11 @@ export default function YourPalace() {
       name,
       rooms,
       anchors,
+      connections, // **Verbindungen mitabspeichern**
       savedAt: new Date().toISOString().slice(0, 23).replace("T", " "),
     };
+
+    console.log("Speichere Palast:", payload);
 
     try {
       const checkRes = await fetch(`/api/palace-exists?name=${encodeURIComponent(payload.name)}`);
@@ -168,6 +180,10 @@ export default function YourPalace() {
             setSelected={setSelected}
             getNextRoomId={getNextRoomId}
             releaseRoomId={releaseRoomId}
+            connectionMode={connectionMode}
+            connections={connections}
+            setConnections={setConnections}
+            showConnections={showConnections}
           />
         </div>
 
@@ -191,16 +207,56 @@ export default function YourPalace() {
             </button>
           </div>
 
-          {sidebarItems.map((section) => (
-            <div className={styles.section} key={section.section}>
-              <div className={styles.sectionTitle}>{section.section}</div>
-              <div className={styles.itemGrid}>
-                {section.items.map((item) => (
-                  <DraggableItem key={`${item.icon}-${item.variant || "default"}`} {...item} />
-                ))}
+          {/* Sidebar Items: wenn connectionMode aktiv, die drei Sektionen Rooms/Objects/Anchors ausblenden */}
+          {sidebarItems.map((section) => {
+            const hideSections = ["Rooms", "Objects", "Anchors"];
+            if (connectionMode && hideSections.includes(section.section)) {
+              return null; // ausblenden während Connections-Modus
+            }
+            return (
+              <div className={styles.section} key={section.section}>
+                <div className={styles.sectionTitle}>{section.section}</div>
+                <div className={styles.itemGrid}>
+                  {section.items.map((item) => (
+                    <DraggableItem key={`${item.icon}-${item.variant || "default"}`} {...item} />
+                  ))}
+                </div>
               </div>
+            );
+          })}
+
+          {/* Verbindungskontrollen (immer sichtbar) */}
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>Verbindungen</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={connectionMode}
+                  onChange={(e) => setConnectionMode(e.target.checked)}
+                />{" "}
+                Connections-Modus (ziehen)
+              </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showConnections}
+                  onChange={(e) => setShowConnections(e.target.checked)}
+                />{" "}
+                Linien sichtbar
+              </label>
+
+              <button
+                onClick={() => {
+                  // einfache Möglichkeit, alle Verbindungen zu löschen
+                  if (confirm("Alle Verbindungen löschen?")) setConnections([]);
+                }}
+              >
+                Verbindungen löschen
+              </button>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </DndProvider>
