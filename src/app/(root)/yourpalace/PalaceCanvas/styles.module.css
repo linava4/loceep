@@ -35,6 +35,33 @@
   cursor: not-allowed;
 }
 
+/* Neue Styles für Modus-Buttons */
+.modeButtons {
+  display: flex;
+  gap: 5px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.modeButtons button {
+  flex: 1;
+  padding: 6px;
+}
+
+.modeButtons .activeMode {
+  background-color: #556b2f; /* Dunkelgrün */
+  color: white;
+  font-weight: bold;
+}
+
+.infoBox {
+  padding: 10px;
+  border: 1px solid #aaa;
+  background: white;
+  border-radius: 5px;
+  font-size: 14px;
+  width: 100%;
+}
 /* --- CANVAS CONTAINER DIE GANZE VERFÜGBARE FLÄCHE!!! --- */
 .canvasContainer {
   flex: 1 1 auto;

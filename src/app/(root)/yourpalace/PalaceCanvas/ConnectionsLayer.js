@@ -1,22 +1,12 @@
 import React from "react";
 import { Layer, Line } from "react-konva";
-import { ItemTypes } from "./constants";
 
 /**
  * Zeichnet Verbindungen zwischen Ankern.
- * Entscheidet die absolute Position von Ankern (wenn sie in Räumen liegen).
+ * Erwartet eine getAbsolutePos-Funktion, die die absolute Position eines Elements (insb. Anchor) liefert.
  */
-export default function ConnectionsLayer({ elements, connections, draggingLine, visible }) {
-  if (!visible) return null;
-
-  // Hilfsfunktion: absolute Position eines Elements (insb. Anchor)
-  const getAbsolutePos = (el) => {
-    if (!el) return [0, 0];
-    if (!el.roomId) return [el.x + 16, el.y + 16];
-    const room = elements.find((e) => e.id === el.roomId && e.type === ItemTypes.ROOM);
-    if (!room) return [el.x + 16, el.y + 16];
-    return [room.x + el.x + 16, room.y + el.y + 16];
-  };
+export default function ConnectionsLayer({ elements, connections, draggingLine, visible, getAbsolutePos }) {
+  if (!visible || !getAbsolutePos) return null;
 
   return (
     <Layer>
@@ -24,13 +14,18 @@ export default function ConnectionsLayer({ elements, connections, draggingLine, 
         const fromEl = elements.find((e) => e.id === conn.fromId);
         const toEl = elements.find((e) => e.id === conn.toId);
         if (!fromEl || !toEl) return null;
-        const [x1, y1] = getAbsolutePos(fromEl);
-        const [x2, y2] = getAbsolutePos(toEl);
+        
+        // Füge 16 hinzu, um den Mittelpunkt des 32x32 Anker-Icons zu treffen
+        const x1 = getAbsolutePos(fromEl).x + 16;
+        const y1 = getAbsolutePos(fromEl).y + 16;
+        const x2 = getAbsolutePos(toEl).x + 16;
+        const y2 = getAbsolutePos(toEl).y + 16;
+        
         return (
           <Line
             key={i}
             points={[x1, y1, x2, y2]}
-            stroke="orange"
+            stroke="lightblue"
             strokeWidth={3}
             tension={0.3}
             lineCap="round"
@@ -42,7 +37,7 @@ export default function ConnectionsLayer({ elements, connections, draggingLine, 
       {draggingLine && (
         <Line
           points={draggingLine.points}
-          stroke="orange"
+          stroke="lightblue"
           strokeWidth={3}
           tension={0.3}
           lineCap="round"

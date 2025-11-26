@@ -8,7 +8,7 @@ export const SIDEBAR_ITEMS = [
     items: [],
   },
   {
-    section: "Objects",
+    section: "Objects", 
     items: [],
   },
   {

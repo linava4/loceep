@@ -32,19 +32,25 @@ export default function usePalaceManager() {
    * und entfernt diese aus dem Pool (Reservierung).
    * Rückgabe ist ein string wie: room-1-10-163834... (variant-numId-timestamp)
    */
-  const getNextRoomId = useCallback((variant) => {
-    const safeVariant = [1, 2, 3].includes(Number(variant)) ? Number(variant) : 1;
-    const ids = availableRoomIds[safeVariant] || [];
-    const baseNum = ids.length > 0 ? ids[0] : Math.floor(Math.random() * 1000);
+  const getNextRoomId = useCallback(
+    (variant) => {
+      const safeVariant = [1, 2, 3].includes(Number(variant))
+        ? Number(variant)
+        : 1;
+      const ids = availableRoomIds[safeVariant] || [];
+      const baseNum =
+        ids.length > 0 ? ids[0] : Math.floor(Math.random() * 1000);
 
-    // pop the first id
-    setAvailableRoomIds((prev) => ({
-      ...prev,
-      [safeVariant]: (prev[safeVariant] || []).slice(1),
-    }));
+      // pop the first id
+      setAvailableRoomIds((prev) => ({
+        ...prev,
+        [safeVariant]: (prev[safeVariant] || []).slice(1),
+      }));
 
-    return `room-${safeVariant}-${baseNum}-${Date.now()}`;
-  }, [availableRoomIds]);
+      return `room-${safeVariant}-${baseNum}-${Date.now()}`;
+    },
+    [availableRoomIds]
+  );
 
   /**
    * Gibt eine zuvor reservierte Room-Nummer wieder frei.
@@ -64,16 +70,10 @@ export default function usePalaceManager() {
   }, []);
 
   /**
-   * Lade-Handler: erzeugt Elemente (rooms + objects) aus DB-Daten.
-   * Erwartet ein Objekt mit (mind.) rooms und objects Arrays.
+   * Lade-Handler: erzeugt Elemente (rooms, objects, anchors) aus DB-Daten.
+   * Erwartet ein Objekt mit (mind.) rooms, objects und anchors Arrays.
    *
-   * Diese Funktion versucht tolerant verschiedene Feldnamen zu unterstützen:
-   * - rooms[].IDENTIFIER oder rooms[].id
-   * - rooms[].ROOM_ID (Variante) und POS_X / POS_Y
-   * - objects[].IDENTIFIER oder objects[].id
-   * - objects[].ROOM_IDENTIFIER oder objects[].ROOM_ID (Zuordnung zu Raum)
-   *
-   * Falls deine DB-Felder anders heißen, passe die Feldnamen hier an.
+   * Zusätzlich werden hier auch die geladenen connections zurückgegeben.
    */
   const loadPalaceFromData = useCallback((data) => {
     if (!data) {
@@ -82,15 +82,19 @@ export default function usePalaceManager() {
     }
 
     const rawRooms = data.rooms || [];
+    const rawObjects = data.objects || []; // Neu
     const rawAnchors = data.anchors || [];
+    const rawConnections = data.connections || []; // Neu
 
-    console.log("Rohdaten laden:", { rawRooms, rawAnchors });
+    console.log("Rohdaten laden:", {
+      rawRooms,
+      rawObjects,
+      rawAnchors,
+      rawConnections,
+    });
 
     const rooms = rawRooms.map((room) => {
-      // bevorzugte Felder, Fallbacks
-
-
-      const identifier = room.IDENTIFIER ?? null;
+      const identifier = room.IDENTIFIER ?? room.id ?? null;
       const variant = Number(room.ROOM_ID ?? 1);
       const posX = Number(room.POS_X ?? 0);
       const posY = Number(room.POS_Y ?? 0);
@@ -107,28 +111,55 @@ export default function usePalaceManager() {
       };
     });
 
-    const anchors = rawAnchors.map((anch) => {
-      const identifier = anch.IDENTIFIER ?? null;
-      const posX = Number(anch.POS_X ?? 0);
-      const posY = Number(anch.POS_Y ?? 0);
-
-      // bestimme roomId: entweder ein vollständiger identifier oder eine Zahl -> mappe zu room-<num>
-      
+    const objects = rawObjects.map((obj) => {
+      // Annahme: Objects speichern ihre Position (POS_X/Y) und ihren Eltern-Container (ROOM_ID)
+      const identifier = obj.IDENTIFIER ?? obj.id ?? null;
+      const posX = Number(obj.POS_X ?? 0);
+      const posY = Number(obj.POS_Y ?? 0);
+      const width = getObjectSize(obj.WIDTH);
+      const height = getObjectSize(obj.HEIGHT);
+      // ROOM_ID kann Raum- oder Objekt-ID sein (bei Objekten, die an Räumen haften)
+      const parentId = obj.ROOM_ID ?? obj.PARENT_ID ?? null;
 
       return {
-        id: identifier ?? `anch-${Math.random().toString(36).slice(2, 9)}-${Date.now()}`,
+        id:
+          identifier ??
+          `obj-${Math.random().toString(36).slice(2, 9)}-${Date.now()}`,
+        type: ItemTypes.OBJECT,
+        icon: obj.ICON,
+        x: posX,
+        y: posY,
+        width,
+        height,
+        roomId: parentId, // roomId-Feld dient hier als Parent-ID
+        variant: obj.OBJECT_ID ?? null,
+      };
+    });
+
+    const anchors = rawAnchors.map((anch) => {
+      const identifier = anch.IDENTIFIER ?? anch.id ?? null;
+      const posX = Number(anch.POS_X ?? 0);
+      const posY = Number(anch.POS_Y ?? 0);
+      // ROOM_ID kann Raum- oder Objekt-ID sein (bei Ankern)
+      const parentId = anch.ROOM_ID ?? anch.PARENT_ID ?? null;
+
+      return {
+        id:
+          identifier ??
+          `anch-${Math.random().toString(36).slice(2, 9)}-${Date.now()}`,
         type: ItemTypes.ANCHOR,
         icon: anch.ICON,
         x: posX,
         y: posY,
         width: Number(anch.WIDTH ?? 1),
         height: Number(anch.HEIGHT ?? 1),
-        roomId: anch.ROOM_ID ?? null,
+        roomId: parentId, // roomId-Feld dient hier als Parent-ID (Raum oder Objekt)
         variant: anch.ANCHOR_ID ?? null,
+        info: anch.INFO ?? "", // Für den Info-Modus
       };
     });
 
-    const merged = [...rooms, ...anchors];
+    const merged = [...rooms, ...objects, ...anchors];
     setElements(merged);
 
     // Palace meta (Name)
@@ -141,26 +172,34 @@ export default function usePalaceManager() {
     console.log("Palast geladen — Elemente:", merged);
     localStorage.removeItem("palaceId");
 
+    return { elements: merged, connections: rawConnections }; // Connections zurückgeben
+
   }, [getNextRoomId, setElements, setPalaceName]);
 
   // Lade-Handler: lädt Palast-Daten von der API anhand der palaceId
-  const loadPalaceFromId = useCallback(async (palaceId) => {
-    if (!palaceId) {
-      console.warn("loadPalaceFromId: keine palaceId übergeben");
-      return;
-    }
-    try {
-      const res = await fetch(`/api/load-palace?palaceId=${encodeURIComponent(palaceId)}`);
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "Fehler beim Lesen der Fehlermeldung");
-        throw new Error(`Fehler beim Laden des Palastes: ${txt}`);
+  const loadPalaceFromId = useCallback(
+    async (palaceId) => {
+      if (!palaceId) {
+        console.warn("loadPalaceFromId: keine palaceId übergeben");
+        return null;
       }
-      const data = await res.json();
-      loadPalaceFromData(data);
-    } catch (err) {
-      console.error("Fehler beim Laden des Palastes:", err);
-    }
-  }, [loadPalaceFromData]);
+      try {
+        const res = await fetch(
+          `/api/load-palace?palaceId=${encodeURIComponent(palaceId)}`
+        );
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "Fehler beim Lesen der Fehlermeldung");
+          throw new Error(`Fehler beim Laden des Palastes: ${txt}`);
+        }
+        const data = await res.json();
+        return loadPalaceFromData(data); // Connections aus Daten zurückgeben
+      } catch (err) {
+        console.error("Fehler beim Laden des Palastes:", err);
+        return null;
+      }
+    },
+    [loadPalaceFromData]
+  );
 
   return {
     elements,
@@ -174,11 +213,13 @@ export default function usePalaceManager() {
   };
 }
 
-
-
-
 const getRoomSize = (length) => {
   return length * GRID_SIZE;
 };
 
-
+// Hilfsfunktion zur Größenbestimmung von Objekten (wie Räume, aber optional kleiner)
+const getObjectSize = (length) => {
+  // Wenn die Zahl klein ist (z.B. 1, 2, 3), nehmen wir 32px als Basis (kleine Objekte)
+  if (length < 10 && length !== 0) return 32; 
+  return length * GRID_SIZE;
+}

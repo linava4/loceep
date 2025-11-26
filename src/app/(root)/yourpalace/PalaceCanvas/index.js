@@ -10,6 +10,12 @@ import { ItemTypes, GRID_SIZE, SIDEBAR_ITEMS } from "./constants";
 import styles from "./styles.module.css";
 import usePalaceManager from "./usePalaceManager";
 
+export const EditorModes = {
+  BUILD: "build",
+  CONNECT: "connect",
+  INFO: "info", // Für zukünftige Nutzung: Anker/Objekt-Infos bearbeiten
+};
+
 export default function YourPalace() {
   const {
     elements,
@@ -19,25 +25,30 @@ export default function YourPalace() {
     loadPalaceFromId,
     getNextRoomId,
     releaseRoomId,
+    loadPalaceFromData, // Wird für Connections-Laden benötigt
   } = usePalaceManager();
 
   const [selected, setSelected] = useState(null);
   const [sidebarItems, setSidebarItems] = useState(SIDEBAR_ITEMS);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
-  // Neuer State: Connections + UI Toggles
+  // Zustand für Verbindungen und UI-Toggles, jetzt mit Mode-State
   const [connections, setConnections] = useState([]);
-  const [connectionMode, setConnectionMode] = useState(false); // wenn true: Verbindungsmodus aktiv
-  const [showConnections, setShowConnections] = useState(true); // sichtbar / unsichtbar
+  const [showConnections, setShowConnections] = useState(true);
+  const [mode, setMode] = useState(EditorModes.BUILD); // Neu: Modus-State
 
+  // Verbindungen aus den geladenen Daten übernehmen, wenn Palast geladen wird
+  // Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData
   useEffect(() => {
     const storedId = localStorage.getItem("palaceId");
     if (storedId) {
       try {
         const id = JSON.parse(storedId);
-        if (id){
-            data = loadPalaceFromId(id);
-            console.log("Geladene Palastdaten:", data);
+        if (id) {
+          const data = loadPalaceFromId(id);
+          if (data && data.connections) {
+            setConnections(data.connections);
+          }
         }
       } catch (e) {
         console.error("Fehler beim Lesen der palaceId", e);
@@ -60,6 +71,7 @@ export default function YourPalace() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [unsavedChanges]);
 
+  // Raum- und Anker-Fetching (unverändert) + Hinzufügen von Objekt-Fetching
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -77,7 +89,9 @@ export default function YourPalace() {
 
         setSidebarItems((prev) =>
           prev.map((section) =>
-            section.section === "Rooms" ? { ...section, items: dbRooms } : section
+            section.section === "Rooms"
+              ? { ...section, items: dbRooms }
+              : section
           )
         );
       } catch (err) {
@@ -99,11 +113,11 @@ export default function YourPalace() {
           variant: anchor.ANCHOR_ID,
         }));
 
-        console.log("Geladene Anker aus DB:", dbAnchors);
-
         setSidebarItems((prev) =>
           prev.map((section) =>
-            section.section === "Anchors" ? { ...section, items: dbAnchors } : section
+            section.section === "Anchors"
+              ? { ...section, items: dbAnchors }
+              : section
           )
         );
       } catch (err) {
@@ -111,15 +125,54 @@ export default function YourPalace() {
       }
     };
 
+    const fetchObjects = async () => {
+      try {
+        const res = await fetch("/api/objects"); // Angenommene API für Objekte
+        if (!res.ok) throw new Error("Fehler beim Laden der Objekte");
+        const data = await res.json();
+
+        const dbObjects = data.map((obj) => ({
+          type: ItemTypes.OBJECT,
+          icon: obj.ICON,
+          width: Number(obj.WIDTH) * (obj.WIDTH < 10 ? 1 : GRID_SIZE), // kleine Objekte (Anker-Style) vs. große Objekte (Raum-Style)
+          height: Number(obj.HEIGHT) * (obj.HEIGHT < 10 ? 1 : GRID_SIZE),
+          variant: obj.OBJECT_ID,
+        }));
+
+        setSidebarItems((prev) =>
+          prev.map((section) =>
+            section.section === "Objects"
+              ? { ...section, items: dbObjects }
+              : section
+          )
+        );
+      } catch (err) {
+        console.error("Fehler beim Fetchen der Objekte:", err);
+      }
+    };
+
     fetchRooms();
     fetchAnchors();
+    fetchObjects();
   }, []);
 
   const handleDeleteSelected = () => {
     if (!selected) return;
-    // Wenn ein Ank mit Verbindungen gelöscht wird, entferne auch Verbindungen
-    setConnections((prev) => prev.filter((c) => c.fromId !== selected.id && c.toId !== selected.id));
-    setElements((prev) => prev.filter((el) => el.id !== selected.id));
+
+    // 1. Entferne Verbindungen, die den gelöschten Anker/Raum/Objekt betreffen
+    setConnections((prev) =>
+      prev.filter((c) => c.fromId !== selected.id && c.toId !== selected.id)
+    );
+
+    // 2. Wenn ein Raum oder Objekt gelöscht wird, entferne alle darin enthaltenen Anker/Objekte
+    if (selected.type === ItemTypes.ROOM || selected.type === ItemTypes.OBJECT) {
+      setElements((prev) =>
+        prev.filter((el) => el.id !== selected.id && el.roomId !== selected.id)
+      );
+    } else {
+      // 3. Andernfalls (Anchor/Object) nur das Element selbst löschen
+      setElements((prev) => prev.filter((el) => el.id !== selected.id));
+    }
     setSelected(null);
   };
 
@@ -132,12 +185,14 @@ export default function YourPalace() {
     }
 
     const rooms = elements.filter((el) => el.type === ItemTypes.ROOM);
-    const anchors = elements.filter((el) => el.type !== ItemTypes.ROOM);
+    const objects = elements.filter((el) => el.type === ItemTypes.OBJECT); // Objekte speichern
+    const anchors = elements.filter((el) => el.type === ItemTypes.ANCHOR); // Anker speichern
     const payload = {
       name,
       rooms,
+      objects, // **Objekte mitspeichern**
       anchors,
-      connections, // **Verbindungen mitabspeichern**
+      connections, // **Verbindungen mitspeichern**
       savedAt: new Date().toISOString().slice(0, 23).replace("T", " "),
     };
 
@@ -169,6 +224,28 @@ export default function YourPalace() {
     }
   };
 
+  const handleSetMode = (newMode) => {
+    setMode(newMode);
+    // Wenn in den Connect-Modus gewechselt wird, Auswahl aufheben
+    if (newMode === EditorModes.CONNECT) {
+      setSelected(null);
+    }
+  };
+
+  // Hilfsfunktion: Überprüfen, ob ein Anker bereits Teil einer Verbindung ist (als fromId oder toId)
+  const isAnchorUsedAsSource = (anchorId) => {
+    return connections.some((conn) => conn.fromId === anchorId);
+  };
+
+  // NEU: Prüft, ob der Anker bereits als ZIEL (toId) verwendet wird
+  const isAnchorUsedAsTarget = (anchorId) => {
+    return connections.some((conn) => conn.toId === anchorId);
+  };
+
+  // Wenn der Info-Modus aktiv ist und ein Anker ausgewählt ist, zeige die Info-Sidebar
+  const showInfoSidebar = selected && selected.type === ItemTypes.ANCHOR && mode === EditorModes.INFO;
+
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.container}>
@@ -180,10 +257,12 @@ export default function YourPalace() {
             setSelected={setSelected}
             getNextRoomId={getNextRoomId}
             releaseRoomId={releaseRoomId}
-            connectionMode={connectionMode}
+            mode={mode} // Modus an CanvasArea übergeben
             connections={connections}
             setConnections={setConnections}
             showConnections={showConnections}
+            isAnchorUsedAsSource={isAnchorUsedAsSource}
+            isAnchorUsedAsTarget={isAnchorUsedAsTarget} // Neue Prop für die Verbindungsprüfung
           />
         </div>
 
@@ -203,41 +282,57 @@ export default function YourPalace() {
           <div className={styles.sidebarButtons}>
             <button onClick={handleSave}>Save</button>
             <button onClick={handleDeleteSelected} disabled={!selected}>
-              Delete
+              Delete Selected
             </button>
           </div>
 
-          {/* Sidebar Items: wenn connectionMode aktiv, die drei Sektionen Rooms/Objects/Anchors ausblenden */}
-          {sidebarItems.map((section) => {
-            const hideSections = ["Rooms", "Objects", "Anchors"];
-            if (connectionMode && hideSections.includes(section.section)) {
-              return null; // ausblenden während Connections-Modus
-            }
-            return (
-              <div className={styles.section} key={section.section}>
-                <div className={styles.sectionTitle}>{section.section}</div>
-                <div className={styles.itemGrid}>
-                  {section.items.map((item) => (
-                    <DraggableItem key={`${item.icon}-${item.variant || "default"}`} {...item} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+          {/* Modus-Umschalter */}
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>Modus</div>
+            <div className={styles.modeButtons}>
+              <button
+                onClick={() => handleSetMode(EditorModes.BUILD)}
+                className={mode === EditorModes.BUILD ? styles.activeMode : ""}
+              >
+                🛠️ Bauen
+              </button>
+              <button
+                onClick={() => handleSetMode(EditorModes.CONNECT)}
+                className={mode === EditorModes.CONNECT ? styles.activeMode : ""}
+              >
+                🔗 Verbinden
+              </button>
+              <button
+                onClick={() => handleSetMode(EditorModes.INFO)}
+                className={mode === EditorModes.INFO ? styles.activeMode : ""}
+              >
+                ℹ️ Info
+              </button>
+            </div>
+          </div>
 
-          {/* Verbindungskontrollen (immer sichtbar) */}
+          {/* Sidebar Items: nur anzeigen im BUILD-Modus */}
+          {mode === EditorModes.BUILD &&
+            sidebarItems.map((section) => {
+              return (
+                <div className={styles.section} key={section.section}>
+                  <div className={styles.sectionTitle}>{section.section}</div>
+                  <div className={styles.itemGrid}>
+                    {section.items.map((item) => (
+                      <DraggableItem
+                        key={`${item.type}-${item.variant || "default"}`}
+                        {...item}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+          {/* Verbindungskontrollen (immer sichtbar, aber nur relevant im Connect-Modus) */}
           <div className={styles.section}>
             <div className={styles.sectionTitle}>Verbindungen</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={connectionMode}
-                  onChange={(e) => setConnectionMode(e.target.checked)}
-                />{" "}
-                Connections-Modus (ziehen)
-              </label>
-
               <label>
                 <input
                   type="checkbox"
@@ -252,11 +347,26 @@ export default function YourPalace() {
                   // einfache Möglichkeit, alle Verbindungen zu löschen
                   if (confirm("Alle Verbindungen löschen?")) setConnections([]);
                 }}
+                disabled={connections.length === 0}
               >
-                Verbindungen löschen
+                Alle Verbindungen löschen
               </button>
             </div>
           </div>
+          
+          {/* Info Sidebar (zeigt Infos zum ausgewählten Anker) */}
+          {showInfoSidebar && (
+            <div className={styles.section}>
+              <div className={styles.sectionTitle}>Anker-Informationen</div>
+              <div className={styles.infoBox}>
+                <p>Anker ID: **{selected.id}**</p>
+                {/* Hier könnten später Textareas für Informationen sein */}
+                <p style={{ marginTop: 10 }}>
+                  *Hier können im INFO-Modus Anker-Details bearbeitet werden.*
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DndProvider>
