@@ -9,12 +9,16 @@ import Image from 'next/image';
 const ItemList = () => {
   const [items, setItems] = useState([]);
 
-  // Beispiel: Daten aus der Datenbank laden (hier Dummy)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/palace-list');
+        const res = await fetch("/api/palace-list", {
+          method: "GET",
+          credentials: "include",
+        });
+
         const data = await res.json();
+        
 
         const dbPalaces = data.map((palace) => ({
           id: palace.PALACE_ID,

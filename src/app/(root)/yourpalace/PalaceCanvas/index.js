@@ -134,8 +134,8 @@ export default function YourPalace() {
         const dbObjects = data.map((obj) => ({
           type: ItemTypes.OBJECT,
           icon: obj.ICON,
-          width: Number(obj.WIDTH) * (obj.WIDTH < 10 ? 1 : GRID_SIZE), // kleine Objekte (Anker-Style) vs. große Objekte (Raum-Style)
-          height: Number(obj.HEIGHT) * (obj.HEIGHT < 10 ? 1 : GRID_SIZE),
+          width: Number(obj.WIDTH), // kleine Objekte (Anker-Style) vs. große Objekte (Raum-Style)
+          height: Number(obj.HEIGHT),
           variant: obj.OBJECT_ID,
         }));
 

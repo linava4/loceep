@@ -99,11 +99,14 @@ export default function CanvasArea({
           id: `${item.type.slice(0, 4)}-${Math.floor(Math.random() * 10000)}-${Date.now()}`,
           type: item.type,
           icon: item.icon,
+          width: item.width,     // <--- HINZUGEFÜGT
+          height: item.height,    // <--- HINZUGEFÜGT
           x: relX,
           y: relY,
           roomId: parent.id, // Parent-ID
           variant: item.variant,
         };
+        console.log(newItem);
         setElements((prev) => [...prev, newItem]);
       } else {
         // Freier Drop auf Canvas
@@ -113,6 +116,8 @@ export default function CanvasArea({
           icon: item.icon,
           x: pos.x,
           y: pos.y,
+          width: item.width,     // <--- HINZUGEFÜGT
+          height: item.height,
           roomId: null,
           variant: item.variant,
         };
@@ -282,6 +287,7 @@ export default function CanvasArea({
               .map((obj) => {
                 const isContained = elements.some((e) => e.id === obj.roomId && e.type === ItemTypes.ROOM);
                 const absPos = isContained ? getAbsolutePos(obj, elements) : { x: obj.x, y: obj.y };
+                console.log(obj);
                 return (
                   <Group
                     key={obj.id}
@@ -293,8 +299,8 @@ export default function CanvasArea({
                   >
                     <Rect
                       // Objekt-Größe aus dem Element-State
-                      width={70}
-                      height={70}
+                      width={obj.width*40 || 70}
+                      height={obj.height*40 || 70}
                       fill="lightgray"
                       stroke={selected?.id === obj.id ? "orange" : "black"}
                       strokeWidth={selected?.id === obj.id ? 4 : 1}
