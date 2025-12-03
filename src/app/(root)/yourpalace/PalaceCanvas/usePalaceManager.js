@@ -86,6 +86,8 @@ export default function usePalaceManager() {
     const rawAnchors = data.anchors || [];
     const rawConnections = data.connections || []; // Neu
 
+
+
     console.log("Rohdaten laden:", {
       rawRooms,
       rawObjects,
@@ -116,8 +118,8 @@ export default function usePalaceManager() {
       const identifier = obj.IDENTIFIER ?? obj.id ?? null;
       const posX = Number(obj.POS_X ?? 0);
       const posY = Number(obj.POS_Y ?? 0);
-      const width = getObjectSize(obj.WIDTH);
-      const height = getObjectSize(obj.HEIGHT);
+      const width = obj.WIDTH;
+      const height = obj.HEIGHT;
       // ROOM_ID kann Raum- oder Objekt-ID sein (bei Objekten, die an Räumen haften)
       const parentId = obj.ROOM_ID ?? obj.PARENT_ID ?? null;
 
@@ -159,6 +161,13 @@ export default function usePalaceManager() {
       };
     });
 
+    const connections = rawConnections.map((con) => {
+      return {
+        fromId: con.FROM_ANCHOR,
+        toId: con.TO_ANCHOR,  
+      };
+    });
+
     const merged = [...rooms, ...objects, ...anchors];
     setElements(merged);
 
@@ -172,7 +181,7 @@ export default function usePalaceManager() {
     console.log("Palast geladen — Elemente:", merged);
     localStorage.removeItem("palaceId");
 
-    return { elements: merged, connections: rawConnections }; // Connections zurückgeben
+    return { elements: merged, connections: connections }; // Connections zurückgeben
 
   }, [getNextRoomId, setElements, setPalaceName]);
 

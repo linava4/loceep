@@ -39,22 +39,43 @@ export default function YourPalace() {
 
   // Verbindungen aus den geladenen Daten übernehmen, wenn Palast geladen wird
   // Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData
-  useEffect(() => {
-    const storedId = localStorage.getItem("palaceId");
-    if (storedId) {
-      try {
-        const id = JSON.parse(storedId);
-        if (id) {
-          const data = loadPalaceFromId(id);
-          if (data && data.connections) {
-            setConnections(data.connections);
-          }
-        }
-      } catch (e) {
-        console.error("Fehler beim Lesen der palaceId", e);
-      }
-    }
-  }, [loadPalaceFromId]);
+  // index.js (Korrigierter useEffect)
+  // index.js
+// ...
+// Verbindungen aus den geladenen Daten übernehmen, wenn Palast geladen wird
+// Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData
+  useEffect(() => {
+    // 💡 Wir definieren eine asynchrone Funktion im Inneren
+    const loadPalace = async () => { // ASYNC-Funktion
+      const storedId = localStorage.getItem("palaceId");
+      if (storedId) {
+        try {
+          const id = JSON.parse(storedId);
+          if (id) {
+            // NEU: await verwenden! Die Funktion WARTET hier.
+            const data = await loadPalaceFromId(id); 
+
+            console.log("Geladene Palast-Daten (nach await):", data); 
+            
+            // Der usePalaceManager:loadPalaceFromData() Call setzt bereits Elements und PalaceName!
+            // data ist jetzt das Objekt { elements: [...], connections: [...] }
+
+            // Jetzt connections setzen
+            if (data && data.connections) { 
+              setConnections(data.connections); // connections setzen
+            }
+            // loadPalaceFromData(data) wird im usePalaceManager:loadPalaceFromId bereits aufgerufen, 
+            // d.h. die Elemente sind jetzt schon gesetzt.
+          }
+        } catch (e) {
+          console.error("Fehler beim Lesen der palaceId oder Laden des Palastes", e);
+        }
+      }
+    };
+
+    loadPalace(); // 💡 Die Funktion aufrufen
+
+  }, [loadPalaceFromId, setConnections]); // setConnections als Abhängigkeit hinzugefügt (sicherer)
 
   useEffect(() => {
     setUnsavedChanges(true);
@@ -127,7 +148,7 @@ export default function YourPalace() {
 
     const fetchObjects = async () => {
       try {
-        const res = await fetch("/api/objects"); // Angenommene API für Objekte
+        const res = await fetch("/api/objects"); 
         if (!res.ok) throw new Error("Fehler beim Laden der Objekte");
         const data = await res.json();
 

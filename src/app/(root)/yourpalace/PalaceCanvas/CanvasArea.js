@@ -2,29 +2,17 @@ import React, { useRef, useState, useEffect } from "react";
 import { useDrop } from "react-dnd";
 import { Stage, Layer, Rect, Text, Group } from "react-konva";
 import { ItemTypes, GRID_SIZE } from "./constants";
-import { snapToGrid, isOverlapping, findRoomAtPosition } from "./helpers";
+import { snapToGrid, isOverlapping, findRoomAtPosition, getAbsolutePos } from "./helpers";
 import ConnectionsLayer from "./ConnectionsLayer";
 import { EditorModes } from "./index"; // Importiere Modes
 import styles from "./styles.module.css";
 
 // Helper: Findet den Parent (Raum oder Objekt) an einer Position
-const findParentAtPosition = (x, y, elements) => {
+ const findParentAtPosition = (x, y, elements) => {
   const parents = elements.filter(
     (el) => el.type === ItemTypes.ROOM || el.type === ItemTypes.OBJECT
   );
   return findRoomAtPosition(x, y, parents); // findRoomAtPosition funktioniert auch für Objekte
-};
-
-// Helper: Berechnet die absolute Position eines Elements (Anchor oder Object)
-const getAbsolutePos = (el, elements) => {
-  if (!el || !el.roomId) return { x: el.x, y: el.y };
-
-  const parent = elements.find((e) => e.id === el.roomId);
-  if (!parent) return { x: el.x, y: el.y };
-
-  // Rekursiv die Position des Parents ermitteln (falls Parent auch in einem Raum/Objekt ist)
-  const parentAbs = getAbsolutePos(parent, elements);
-  return { x: parentAbs.x + el.x, y: parentAbs.y + el.y };
 };
 
 export default function CanvasArea({
@@ -106,7 +94,7 @@ export default function CanvasArea({
           roomId: parent.id, // Parent-ID
           variant: item.variant,
         };
-        console.log(newItem);
+        //console.log(newItem);
         setElements((prev) => [...prev, newItem]);
       } else {
         // Freier Drop auf Canvas
@@ -287,7 +275,7 @@ export default function CanvasArea({
               .map((obj) => {
                 const isContained = elements.some((e) => e.id === obj.roomId && e.type === ItemTypes.ROOM);
                 const absPos = isContained ? getAbsolutePos(obj, elements) : { x: obj.x, y: obj.y };
-                console.log(obj);
+                //console.log(obj);
                 return (
                   <Group
                     key={obj.id}

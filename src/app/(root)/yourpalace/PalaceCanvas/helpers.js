@@ -22,3 +22,25 @@ export const findRoomAtPosition = (x, y, rooms) =>
   rooms.find(
     (r) => x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height
   );
+
+
+// Helper: Findet den Parent (Raum oder Objekt) an einer Position
+export const findParentAtPosition = (x, y, elements) => {
+  const parents = elements.filter(
+    (el) => el.type === ItemTypes.ROOM || el.type === ItemTypes.OBJECT
+  );
+  return findRoomAtPosition(x, y, parents); // findRoomAtPosition funktioniert auch für Objekte
+};
+
+// Helper: Berechnet die absolute Position eines Elements (Anchor oder Object)
+export const getAbsolutePos = (el, elements) => {
+  if (!el || !el.roomId) return { x: el.x, y: el.y };
+
+  const parent = elements.find((e) => e.id === el.roomId);
+  if (!parent) return { x: el.x, y: el.y };
+
+  // Rekursiv die Position des Parents ermitteln (falls Parent auch in einem Raum/Objekt ist)
+  const parentAbs = getAbsolutePos(parent, elements);
+  return { x: parentAbs.x + el.x, y: parentAbs.y + el.y };
+};
+

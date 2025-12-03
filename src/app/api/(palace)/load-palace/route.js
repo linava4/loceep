@@ -2,7 +2,7 @@ import { createConnection } from "@/lib/db.js";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {  
-    const loadPalace = "SELECT * from palace WHERE PALACE_ID = ? AND USER_ID = 1"; 
+   const loadPalace = "SELECT * from palace WHERE PALACE_ID = ? AND USER_ID = 1"; 
    const loadRooms = `  SELECT 
                             pr.*, 
                             r.*
@@ -17,6 +17,18 @@ export async function GET(request) {
                             JOIN anchor a ON ra.ANCHOR_ID = a.ANCHOR_ID
                             WHERE ra.PALACE_ID = ? AND ra.ACTIVE = 1
                             `;
+    const loadObjects = `   SELECT 
+                                ro.*, 
+                                o.*
+                            FROM room_object ro
+                            JOIN object o ON ro.OBJECT_ID = o.OBJECT_ID
+                            WHERE ro.PALACE_ID = ? AND ro.ACTIVE = 1
+                            `;
+    const loadConnections = `   SELECT
+                                *
+                            FROM connections
+                            WHERE PALACE_ID = ? AND ACTIVE = 1
+                            `;
    
 
 
@@ -28,12 +40,10 @@ export async function GET(request) {
         const [palace] = await db.query(loadPalace, [palaceId]);    
         const [rooms] = await db.query(loadRooms, [palaceId]);
         const [anchors]= await db.query(loadAnchors, [palaceId]);
+        const [objects]= await db.query(loadObjects, [palaceId]);
+        const [connections]= await db.query(loadConnections, [palaceId]);
 
-        console.log(palace);
-        console.log(rooms);
-        console.log(anchors);
-
-        return NextResponse.json({palace, rooms, anchors});
+        return NextResponse.json({palace, rooms, anchors, objects, connections});
         
     }
     catch(err){
