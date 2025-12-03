@@ -9,6 +9,7 @@ import DraggableItem from "./DraggableItem";
 import { ItemTypes, GRID_SIZE, SIDEBAR_ITEMS } from "./constants";
 import styles from "./styles.module.css";
 import usePalaceManager from "./usePalaceManager";
+import AnchorInfoSidebar from "./AnchorInfo";
 
 export const EditorModes = {
   BUILD: "build",
@@ -36,6 +37,8 @@ export default function YourPalace() {
   const [connections, setConnections] = useState([]);
   const [showConnections, setShowConnections] = useState(true);
   const [mode, setMode] = useState(EditorModes.BUILD); // Neu: Modus-State
+
+  const selectedAnchor = elements.find(el => el.id === selected?.id);
 
   // Verbindungen aus den geladenen Daten übernehmen, wenn Palast geladen wird
   // Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData
@@ -374,21 +377,18 @@ export default function YourPalace() {
               </button>
             </div>
           </div>
-          
           {/* Info Sidebar (zeigt Infos zum ausgewählten Anker) */}
-          {showInfoSidebar && (
-            <div className={styles.section}>
-              <div className={styles.sectionTitle}>Anker-Informationen</div>
-              <div className={styles.infoBox}>
-                <p>Anker ID: **{selected.id}**</p>
-                {/* Hier könnten später Textareas für Informationen sein */}
-                <p style={{ marginTop: 10 }}>
-                  *Hier können im INFO-Modus Anker-Details bearbeitet werden.*
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+          <div style={{ display: showInfoSidebar ? 'flex' : 'none' }}>
+              {/* Wir rendern die Sidebar-Komponente IMMER, aber nur wenn selectedAnchor vorhanden ist */}
+              {selectedAnchor && selectedAnchor.type === ItemTypes.ANCHOR && (
+                  <AnchorInfoSidebar 
+                      selectedAnchor={selectedAnchor}
+                      setElements={setElements}
+                      setUnsavedChanges={setUnsavedChanges}
+                  />
+              )}
+          </div>
+                </div>
       </div>
     </DndProvider>
   );

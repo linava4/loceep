@@ -65,8 +65,18 @@ import { NextResponse } from "next/server";
   const newConnections =
     "INSERT INTO connections (PALACE_ID, FROM_ANCHOR, TO_ANCHOR, VALID_FROM, ACTIVE) VALUES (?, ?, ?, NOW(), 1)";
 
-  
-
+  const newInfo =
+    "INSERT INTO anchor_info (ANCHOR_IDENTIFIER, TITLE, MATERIAL, VALID_FROM, ACTIVE) VALUES (?, ?, ?, NOW(), 1)";
+  const updateInfo =
+    "UPDATE anchor_info SET VALID_TO = NOW(), ACTIVE = ? WHERE ANCHOR_IDENTIFIER = ? AND ACTIVE = 1"; 
+  const existsInfo =
+    "SELECT INFO_ID, TITLE, MATERIAL FROM anchor_info WHERE ANCHOR_IDENTIFIER = ? AND ACTIVE = 1";
+  const deactivateInfo = `
+    UPDATE anchor_info
+    SET VALID_TO = NOW(), ACTIVE = 0
+    WHERE ACTIVE = 1 
+    AND ANCHOR_IDENTIFIER NOT IN (?);
+`;
 export async function POST(request) {
   
   // Hauptlogik
@@ -264,9 +274,51 @@ export async function POST(request) {
         }
       }
 
-      // Entfernte Objekte deaktivieren
+      // Entfernte Verbindungen deaktivieren
       const connectionIds = connections.map((o) => o.fromId);
       await db.query(deactivateConnections, [palaceId, connectionIds]);
+    }
+
+    // Infos (Teilhistorisierung)
+    if (anchors?.length) {
+      for (const info of anchors) {
+        const [existingInfo] = await db.query(existsInfo, [
+          info.id,
+        ]);
+
+
+        if (existingInfo.length) {
+          const old = existingInfo[0];
+
+          console.log("Vergleiche altes und neues Objekt:", old, info);
+          
+
+          // Wenn Position geändert → Historisieren
+          if (old.TITLE !== info.infoTitle || old.MATERIAL !== info.infoMaterial) {
+            await db.query(updateInfo, [
+              0,
+              info.id,
+            ]);
+
+            await db.query(newInfo, [
+              info.id,
+              info.infoTitle,
+              info.infoMaterial,
+            ]);
+          }
+        } else {
+          // neue Verbindung
+          await db.query(newInfo, [
+            info.id,
+            info.infoTitle, 
+            info.infoMaterial,
+          ]);
+        }
+      }
+
+      // Entfernte Verbindungen deaktivieren
+      const infoIds = anchors.map((o) => o.id);
+      await db.query(deactivateInfo, [infoIds]);
     }
 
 

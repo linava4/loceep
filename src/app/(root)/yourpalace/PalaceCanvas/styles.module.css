@@ -15,6 +15,11 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
+
+  /* NEU: Scrollen für vertikalen Überlauf */
+  overflow-y: auto; 
+  /* NEU: Falls der Inhalt die Mindesthöhe überschreiten muss */
+  max-height: 100vh; /* Oder die Höhe des .container-Elternteils */
 }
 
 .sidebarButtons {

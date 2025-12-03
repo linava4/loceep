@@ -157,7 +157,8 @@ export default function usePalaceManager() {
         height: Number(anch.HEIGHT ?? 1),
         roomId: parentId, // roomId-Feld dient hier als Parent-ID (Raum oder Objekt)
         variant: anch.ANCHOR_ID ?? null,
-        info: anch.INFO ?? "", // Für den Info-Modus
+        infoTitle: anch.INFO_TITLE ?? "", 
+        infoMaterial: anch.INFO_MATERIAL ?? "",
       };
     });
 
