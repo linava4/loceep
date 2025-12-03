@@ -37,13 +37,42 @@ import { NextResponse } from "next/server";
   const newAnchors =
     "INSERT INTO room_anchor (PALACE_ID, ROOM_ID, ANCHOR_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, ?, ?, ?, NOW(), 1, ?)";
 
+  //SQL-Konstanten ROOM_OBJECT
+  const existsObjects =
+    "SELECT ROOM_OBJECT_ID, POS_X, POS_Y FROM room_object WHERE PALACE_ID = ? AND IDENTIFIER = ? AND ACTIVE = 1";
+  const updateObjects =
+    "UPDATE room_object SET VALID_TO = NOW(), ACTIVE = ? WHERE ROOM_OBJECT_ID = ? AND PALACE_ID = ?";
+  const deactivateObjects = `
+    UPDATE room_object
+    SET VALID_TO = NOW(), ACTIVE = 0
+    WHERE PALACE_ID = ? AND ACTIVE = 1
+    AND IDENTIFIER NOT IN (?);
+  `;
+  const newObjects =
+    "INSERT INTO room_object (PALACE_ID, ROOM_ID, OBJECT_ID, POS_X, POS_Y, VALID_FROM, ACTIVE, IDENTIFIER) VALUES (?, ?, ?, ?, ?, NOW(), 1, ?)";
+
+  //SQL-Konstanten CONNECTIONS
+  const existsConnections =
+    "SELECT CONNECTION_ID FROM connections WHERE PALACE_ID = ? AND FROM_ANCHOR = ? AND ACTIVE = 1";
+  const updateConnections =
+    "UPDATE connections SET VALID_TO = NOW(), ACTIVE = ? WHERE CONNECTION_ID = ? AND PALACE_ID = ?";
+  const deactivateConnections = `
+    UPDATE connections
+    SET VALID_TO = NOW(), ACTIVE = 0
+    WHERE PALACE_ID = ? AND ACTIVE = 1
+    AND FROM_ANCHOR NOT IN (?);
+  `;
+  const newConnections =
+    "INSERT INTO connections (PALACE_ID, FROM_ANCHOR, TO_ANCHOR, VALID_FROM, ACTIVE) VALUES (?, ?, ?, NOW(), 1)";
+
+  
 
 export async function POST(request) {
   
   // Hauptlogik
   try {
     const db = await createConnection();
-    const { name, rooms, anchors, savedAt } = await request.json();
+    const { name, rooms, anchors, savedAt, objects, connections } = await request.json();
 
     // Palast prüfen oder anlegen
     const [existingPalace] = await db.query(existsPalace, [name, 1]);
@@ -93,10 +122,61 @@ export async function POST(request) {
       await db.query(deactivateRooms, [palaceId, identifiers]);
     }
 
-    // Objekte (Teilhistorisierung)
+    // Anker (Teilhistorisierung)
     if (anchors?.length) {
-      for (const obj of anchors) {
-        const [existingObj] = await db.query(existsAnchors, [
+      for (const anch of anchors) {
+        const [existingAnch] = await db.query(existsAnchors, [
+          palaceId,
+          anch.id,
+        ]);
+
+        console.log("Existierende Objekte prüfen:", existingAnch);
+
+        if (existingAnch.length) {
+          const old = existingAnch[0];
+
+          console.log("Vergleiche altes und neues Objekt:", old, anch);
+          
+
+          // Wenn Position geändert → Historisieren
+          if (old.POS_X !== anch.x || old.POS_Y !== anch.y) {
+            await db.query(updateAnchors, [
+              0,
+              old.ROOM_ANCHOR_ID,
+              palaceId,
+            ]);
+
+            await db.query(newAnchors, [
+              palaceId,
+              anch.roomId,
+              anch.variant,
+              anch.x,
+              anch.y,
+              anch.id,
+            ]);
+          }
+        } else {
+          // Neuer Anker
+          await db.query(newAnchors, [
+            palaceId,
+            anch.roomId,
+            anch.variant,
+            anch.x,
+            anch.y,
+            anch.id,
+          ]);
+        }
+      }
+
+      // Entfernte Anker deaktivieren
+      const anchorIds = anchors.map((o) => o.id);
+      await db.query(deactivateAnchors, [palaceId, anchorIds]);
+    }
+
+    // Objekte (Teilhistorisierung)
+    if (objects?.length) {
+      for (const obj of objects) {
+        const [existingObj] = await db.query(existsObjects, [
           palaceId,
           obj.id,
         ]);
@@ -111,13 +191,13 @@ export async function POST(request) {
 
           // Wenn Position geändert → Historisieren
           if (old.POS_X !== obj.x || old.POS_Y !== obj.y) {
-            await db.query(updateAnchors, [
+            await db.query(updateObjects, [
               0,
-              old.ROOM_ANCHOR_ID,
+              old.ROOM_OBJECT_ID,
               palaceId,
             ]);
 
-            await db.query(newAnchors, [
+            await db.query(newObjects, [
               palaceId,
               obj.roomId,
               obj.variant,
@@ -127,8 +207,8 @@ export async function POST(request) {
             ]);
           }
         } else {
-          // Neuer Anker
-          await db.query(newAnchors, [
+          // Neues Objekt
+          await db.query(newObjects, [
             palaceId,
             obj.roomId,
             obj.variant,
@@ -140,9 +220,55 @@ export async function POST(request) {
       }
 
       // Entfernte Objekte deaktivieren
-      const anchorIds = anchors.map((o) => o.id);
-      await db.query(deactivateAnchors, [palaceId, anchorIds]);
+      const objectIds = objects.map((o) => o.id);
+      await db.query(deactivateObjects, [palaceId, objectIds]);
     }
+
+
+    // Verbindungen (Teilhistorisierung)
+    if (connections?.length) {
+      for (const con of connections) {
+        const [existingCon] = await db.query(existsConnections, [
+          palaceId,
+          con.fromId,
+        ]);
+
+
+        if (existingCon.length) {
+          const old = existingCon[0];
+
+          console.log("Vergleiche altes und neues Objekt:", old, con);
+          
+
+          // Wenn Position geändert → Historisieren
+          if (old.POS_X !== con.x || old.POS_Y !== con.y) {
+            await db.query(updateConnections, [
+              0,
+              old.CONNECTION_ID,
+              palaceId,
+            ]);
+
+            await db.query(newConnections, [
+              palaceId,
+              con.fromId,
+              con.toId,
+            ]);
+          }
+        } else {
+          // neue Verbindung
+          await db.query(newConnections, [
+            palaceId,
+            con.fromId,
+            con.toId,
+          ]);
+        }
+      }
+
+      // Entfernte Objekte deaktivieren
+      const connectionIds = connections.map((o) => o.fromId);
+      await db.query(deactivateConnections, [palaceId, connectionIds]);
+    }
+
 
     return NextResponse.json({ message: "Palast gespeichert", id: palaceId });
   } catch (err) {
@@ -152,4 +278,6 @@ export async function POST(request) {
       { status: 500 }
     );
   }
+
+  
 }
