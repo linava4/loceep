@@ -3,7 +3,7 @@ import style from './page.module.css'
 
 const Templates = () => {
   return (
-    <div className={style.container}>Templates</div>
+    <div className={style.container}>Templates incoming...</div>
   )
 }
 

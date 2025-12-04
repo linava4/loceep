@@ -3,6 +3,7 @@ import React from 'react';
 import style from './page.module.css';
 import Link from 'next/link';
 import Image from 'next/image';
+import LogoutButton from '@/components/logoutButton/LogoutButton';
 
 const Profile = () => {
   return (
@@ -17,7 +18,7 @@ const Profile = () => {
         <Link href="/profile" className={style.button}>User Data</Link>
         <Link href="/savedPalaces" className={style.button}>Saved Palaces</Link>
         <Link href="/settings" className={style.button}>Settings</Link>
-        <Link href="/" className={style.button}>Log-out</Link>
+        <LogoutButton />
       </div>
 
       <div className={style.main}>

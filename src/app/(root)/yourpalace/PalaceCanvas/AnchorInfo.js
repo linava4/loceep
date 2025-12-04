@@ -53,27 +53,27 @@ export default function AnchorInfoSidebar({ selectedAnchor, setElements, setUnsa
 
     return (
         <div >
-            <div className={styles.sectionTitle}>Anker-Informationen: {selectedAnchor.icon}</div>
+            <div className={styles.sectionTitle}>Anchor Info: {selectedAnchor.icon}</div>
             <div className={styles.infoBox}>
                 <p>Anker ID: **{selectedAnchor.id}**</p>
-                <label style={{ display: 'block' }}>Titel:</label>
+                <label style={{ display: 'block' }}>Title:</label>
                 <input
                     type="text"
                     value={title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    placeholder="Titel des Lernmaterials"
+                    placeholder="enter title here"
                 />
-                <label style={{ display: 'block' }}>Material/Inhalt:</label>
+                <label style={{ display: 'block' }}>Material:</label>
                 <textarea
                     value={material}
                     onChange={(e) => handleChange('material', e.target.value)}
                     rows={6}
-                    placeholder="Lernmaterial, Text, Links oder Beschreibung..."
+                    placeholder="Study material goes here..."
                     style={{ width: '100%', minHeight: 150 }}
                 />
 
                 <p style={{fontSize: 12, color: '#555' }}>
-                    *Änderungen werden automatisch im Palast-State gespeichert.*
+                    *Needs title and material to be saved. Changes saved automatically.*
                 </p>
             </div>
         </div>

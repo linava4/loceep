@@ -57,8 +57,10 @@ export default function YourPalace() {
           if (id) {
             // NEU: await verwenden! Die Funktion WARTET hier.
             const data = await loadPalaceFromId(id); 
-
+            localStorage.removeItem("palaceId"); // Einmaliges Laden sicherstellen
+            localStorage.removeItem("selectedPalace"); // Falls palaceData noch da ist, entfernen
             console.log("Geladene Palast-Daten (nach await):", data); 
+            
             
             // Der usePalaceManager:loadPalaceFromData() Call setzt bereits Elements und PalaceName!
             // data ist jetzt das Objekt { elements: [...], connections: [...] }
@@ -226,11 +228,21 @@ export default function YourPalace() {
       const checkRes = await fetch(`/api/palace-exists?name=${encodeURIComponent(payload.name)}`);
       const checkData = await checkRes.json();
 
+      const checkResUser = await fetch("/api/me", {
+          method: "GET",
+          credentials: "include",
+        });
+      const checkDataUser = await checkResUser.json();
+
       if (checkData.exists) {
         const overwrite = confirm(
           `A palace with the name "${payload.name}" already exists. Overwrite?`
         );
         if (!overwrite) return alert("Please name your palace differently to save.");
+      }
+      else if(!checkDataUser.loggedIn) {
+        window.location.href = "/login";
+        return alert("You must be logged in to save a new palace.");
       }
 
       const res = await fetch("/api/save-palace", {
@@ -318,19 +330,19 @@ export default function YourPalace() {
                 onClick={() => handleSetMode(EditorModes.BUILD)}
                 className={mode === EditorModes.BUILD ? styles.activeMode : ""}
               >
-                🛠️ Bauen
+                Build
               </button>
               <button
                 onClick={() => handleSetMode(EditorModes.CONNECT)}
                 className={mode === EditorModes.CONNECT ? styles.activeMode : ""}
               >
-                🔗 Verbinden
+                Connect
               </button>
               <button
                 onClick={() => handleSetMode(EditorModes.INFO)}
                 className={mode === EditorModes.INFO ? styles.activeMode : ""}
               >
-                ℹ️ Info
+                Info
               </button>
             </div>
           </div>
@@ -355,7 +367,7 @@ export default function YourPalace() {
 
           {/* Verbindungskontrollen (immer sichtbar, aber nur relevant im Connect-Modus) */}
           <div className={styles.section}>
-            <div className={styles.sectionTitle}>Verbindungen</div>
+            <div className={styles.sectionTitle}>Connections</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label>
                 <input
@@ -363,17 +375,17 @@ export default function YourPalace() {
                   checked={showConnections}
                   onChange={(e) => setShowConnections(e.target.checked)}
                 />{" "}
-                Linien sichtbar
+                Connections visible
               </label>
 
               <button
                 onClick={() => {
                   // einfache Möglichkeit, alle Verbindungen zu löschen
-                  if (confirm("Alle Verbindungen löschen?")) setConnections([]);
+                  if (confirm("Delete all connections?")) setConnections([]);
                 }}
                 disabled={connections.length === 0}
               >
-                Alle Verbindungen löschen
+                Delete all connections
               </button>
             </div>
           </div>

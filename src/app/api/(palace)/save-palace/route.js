@@ -1,5 +1,6 @@
 import { createConnection } from "@/lib/db.js";
 import { NextResponse } from "next/server";
+import { getUserIdFromCredentials } from "@/lib/auth";
 
 // SQL-Konstanten PALACE
   const existsPalace =
@@ -84,8 +85,17 @@ export async function POST(request) {
     const db = await createConnection();
     const { name, rooms, anchors, savedAt, objects, connections } = await request.json();
 
+    const userId = await getUserIdFromCredentials(request);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Nicht autorisiert: Ungültige oder abgelaufene Session." },
+        { status: 401 }
+      );
+    }
+
     // Palast prüfen oder anlegen
-    const [existingPalace] = await db.query(existsPalace, [name, 1]);
+    const [existingPalace] = await db.query(existsPalace, [name, ]);
     let palaceId;
 
     if (existingPalace.length) {
@@ -307,16 +317,19 @@ export async function POST(request) {
             ]);
           }
         } else {
-          // neue Verbindung
-          await db.query(newInfo, [
+          // neue Info
+          if(info.infoTitle && info.infoMaterial){
+            await db.query(newInfo, [
             info.id,
             info.infoTitle, 
             info.infoMaterial,
           ]);
+          }
+          
         }
       }
 
-      // Entfernte Verbindungen deaktivieren
+      // Entfernte Info deaktivieren
       const infoIds = anchors.map((o) => o.id);
       await db.query(deactivateInfo, [infoIds]);
     }

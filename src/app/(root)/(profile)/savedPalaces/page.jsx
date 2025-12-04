@@ -42,6 +42,7 @@ const ItemList = () => {
     if (!res.ok) throw new Error("Fehler beim Laden");
     const data = await res.json();
     console.log("Palastdaten:", data);
+    console.log("Palastdaten:", palaceId);
 
     // Im LocalStorage speichern (oder über Context)
     localStorage.setItem("palaceId", JSON.stringify(palaceId));

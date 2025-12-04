@@ -40,6 +40,9 @@ const Profile = () => {
             email: data.user.email,
           });
         }
+        else{
+          window.location.href = "/login";
+        }
       } catch (error) {
         console.error("Error loading user:", error);
       } finally {

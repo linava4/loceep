@@ -3,7 +3,7 @@ import style from './page.module.css'
 
 const Quiz = () => {
   return (
-    <div className={style.container}>Quiz</div>
+    <div className={style.container}>Quiz incoming...</div>
   )
 }
 
