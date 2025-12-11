@@ -110,6 +110,7 @@ export default function usePalaceManager() {
         width: getRoomSize(room.WIDTH),
         height: getRoomSize(room.HEIGHT),
         variant,
+        src: room.SRC || null,
       };
     });
 
@@ -135,6 +136,7 @@ export default function usePalaceManager() {
         height,
         roomId: parentId, // roomId-Feld dient hier als Parent-ID
         variant: obj.OBJECT_ID ?? null,
+        src: obj.SRC || null,
       };
     });
 
@@ -157,6 +159,7 @@ export default function usePalaceManager() {
         height: Number(anch.HEIGHT ?? 1),
         roomId: parentId, // roomId-Feld dient hier als Parent-ID (Raum oder Objekt)
         variant: anch.ANCHOR_ID ?? null,
+        src: anch.SRC || null,
         infoTitle: anch.INFO_TITLE ?? "", 
         infoMaterial: anch.INFO_MATERIAL ?? "",
       };

@@ -1,144 +1,203 @@
+/* styles.module.css */
+
+/* --- GRUNDLAYOUT & FARBEN --- */
 .container {
   display: flex;
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  gap: 12px;
+  gap: 0; /* Keine Lücke, Sidebar schließt direkt an */
+  background-color: #0b0f19; /* Deep Space Blue */
+  color: #e2e8f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- SIDEBAR --- */
-.sidebar {
-  width: 220px;
-  background: #d0d7b3;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-
-  /* NEU: Scrollen für vertikalen Überlauf */
-  overflow-y: auto; 
-  /* NEU: Falls der Inhalt die Mindesthöhe überschreiten muss */
-  max-height: 100vh; /* Oder die Höhe des .container-Elternteils */
-}
-
-.sidebarButtons {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.sidebarButtons button {
-  width: 100%;
-  padding: 8px;
-}
-
-.sidebarButtons button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Neue Styles für Modus-Buttons */
-.modeButtons {
-  display: flex;
-  gap: 5px;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.modeButtons button {
-  flex: 1;
-  padding: 6px;
-}
-
-.modeButtons .activeMode {
-  background-color: #556b2f; /* Dunkelgrün */
-  color: white;
-  font-weight: bold;
-}
-
-.infoBox {
-  padding: 10px;
-  border: 1px solid #aaa;
-  background: white;
-  border-radius: 5px;
-  font-size: 14px;
-  width: 100%;
-}
-/* --- CANVAS CONTAINER DIE GANZE VERFÜGBARE FLÄCHE!!! --- */
+/* --- CANVAS BEREICH --- */
 .canvasContainer {
   flex: 1 1 auto;
-  min-width: 0;      /* verhindert, dass Flexbox zu groß / zu klein wird */
-  min-height: 0;
-  display: flex;
-}
-
-/* --- WRAPPER DARIN MUSS FLEX 1 SEIN! --- */
-.canvasWrapper {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  /* wichtige Fixes */
-  background: #f5f6eb;
-  margin: 10px;
-  border-radius: 10px;
-  overflow: hidden;  /* Canvas bleibt sauber eingepasst */
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1b2745 0%, #0b0f19 100%); /* Leichter Verlauf */
+  /* Optional: Hier könnte man ein Sternenhimmel-Hintergrundbild einfügen */
 }
 
-/* --- DAS CANVAS SELBST MUSS *100%* DES WRAPPERS EINNEHMEN! --- */
+.canvasWrapper {
+  /* Der Rahmen um das Canvas (die goldene Linie im Bild) */
+  width: 95%;
+  height: 95%;
+  border: 1px solid #cfaa56; /* Mattes Gold */
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(207, 170, 86, 0.1); /* Leichter Glow */
+  overflow: hidden;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .canvas {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-/* --- ITEM STYLES --- */
-.section {
+/* --- SIDEBAR (RECHTS) --- */
+.sidebar {
+  width: 300px; /* Etwas breiter wie im Bild */
+  background: #111827; /* Dunkler Hintergrund */
+  border-left: 1px solid #374151;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+}
+
+/* --- INPUTS & LABELS --- */
+.sidebar label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.palaceNameInput input,
+.infoBox input,
+.infoBox textarea {
+  width: 100%;
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  outline: none;
+  font-size: 1rem;
+}
+
+.palaceNameInput input:focus,
+.infoBox input:focus,
+.infoBox textarea:focus {
+  border-color: #cfaa56; /* Goldener Fokus */
+}
+
+/* --- BUTTONS --- */
+.sidebarButtons {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
 }
 
-.sectionTitle {
+.sidebarButtons button {
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
   font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  border: none;
+}
+
+/* Save Button (Gold Gradient wie im Bild) */
+.sidebarButtons button:first-child {
+  background: linear-gradient(180deg, #eecda3 0%, #dbbf86 100%);
+  color: #1f2937;
+  border: 1px solid #cfaa56;
+}
+.sidebarButtons button:first-child:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 10px rgba(219, 191, 134, 0.4);
+}
+
+/* Delete Button (Outline Style) */
+.sidebarButtons button:last-child {
+  background: transparent;
+  border: 1px solid #ef4444; /* Rot */
+  color: #ef4444;
+}
+.sidebarButtons button:last-child:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+}
+.sidebarButtons button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #555;
+  color: #555;
+}
+
+/* --- MODUS SCHALTER --- */
+.modeButtons {
+  display: flex;
+  background: #1f2937;
+  padding: 4px;
+  border-radius: 6px;
+  gap: 2px;
+}
+
+.modeButtons button {
+  flex: 1;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.modeButtons .activeMode {
+  background: #374151;
+  color: #cfaa56; /* Gold Text */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* --- DRAGGABLE ITEMS (Rooms, Objects, Anchors) --- */
+.sectionTitle {
+  color: #cfaa56; /* Gold */
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #374151;
+  padding-bottom: 4px;
 }
 
 .itemGrid {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .draggableItem {
-  width: 48px;
-  height: 48px;
-  border: 1px solid #ccc;
+  width: 50px;
+  height: 50px;
+  background: rgba(31, 41, 55, 0.6); /* Semi-transparent */
+  border: 1px solid #cfaa56; /* Gold Border */
   border-radius: 8px;
-  background: white;
-  cursor: grab;
+  color: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  transition: opacity 0.2s;
+  font-size: 1.5rem;
+  cursor: grab;
+  transition: all 0.2s;
+  box-shadow: 0 0 5px rgba(207, 170, 86, 0.1); /* Leichter Glow */
+}
+
+.draggableItem:hover {
+  background: rgba(207, 170, 86, 0.1);
+  box-shadow: 0 0 10px rgba(207, 170, 86, 0.4); /* Starker Glow beim Hover */
+  transform: translateY(-2px);
 }
 
 .dragging {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
-.sidebarHint {
-  font-size: 12px;
-  color: #666;
-  margin-top: 16px;
-  text-align: center;
+/* --- INFO BOX --- */
+.infoBox {
+  background: #1f2937;
+  border: 1px solid #374151;
+  color: #e2e8f0;
 }

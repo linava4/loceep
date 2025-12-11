@@ -3,10 +3,10 @@ import { useDrag } from "react-dnd";
 import styles from "./styles.module.css";
 
 // Macht ein Element in der Sidebar ziehbar
-export default function DraggableItem({ type, icon, width, height, variant }) {
+export default function DraggableItem({ type, icon, width, height, variant, src }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
-    item: { type, icon, width, height, variant },
+    item: { type, icon, width, height, variant, src },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   }));
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useDrop } from "react-dnd";
-import { Stage, Layer, Rect, Text, Group } from "react-konva";
+import { Stage, Layer, Rect, Text, Group, Image as KonvaImage} from "react-konva";
 import { ItemTypes, GRID_SIZE } from "./constants";
 import { snapToGrid, isOverlapping, findRoomAtPosition, getAbsolutePos } from "./helpers";
 import ConnectionsLayer from "./ConnectionsLayer";
@@ -13,6 +13,30 @@ import styles from "./styles.module.css";
     (el) => el.type === ItemTypes.ROOM || el.type === ItemTypes.OBJECT
   );
   return findRoomAtPosition(x, y, parents); // findRoomAtPosition funktioniert auch für Objekte
+};
+
+// Hilfskomponente zum Laden und Anzeigen von Bildern
+const URLImage = ({ src, width, height, ...props }) => {
+  const [image, setImage] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!src) return;
+    const img = new window.Image();
+    img.src = src;
+    img.onload = () => setImage(img);
+  }, [src]);
+
+  // Fallback: Zeige nichts (oder ein Platzhalter-Rechteck), solange das Bild lädt
+  if (!image) return null; 
+
+  return (
+    <KonvaImage
+      image={image}
+      width={width}
+      height={height}
+      {...props}
+    />
+  );
 };
 
 export default function CanvasArea({
@@ -72,7 +96,12 @@ export default function CanvasArea({
           width: item.width || GRID_SIZE,
           height: item.height || GRID_SIZE,
           variant: item.variant,
+          src: item.src || null,
         };
+
+        console.log("Drop-Position (ungesnappt):", item);
+        console.log("Neuer Raum zum Hinzufügen:", newRoom);
+
         if (isOverlapping(newRoom, rooms)) return;
         setElements((prev) => [...prev, newRoom]);
         return;
@@ -93,8 +122,10 @@ export default function CanvasArea({
           y: relY,
           roomId: parent.id, // Parent-ID
           variant: item.variant,
+          src: item.src || null,
         };
-        //console.log(newItem);
+        
+        console.log(newItem);
         setElements((prev) => [...prev, newItem]);
       } else {
         // Freier Drop auf Canvas
@@ -108,6 +139,7 @@ export default function CanvasArea({
           height: item.height,
           roomId: null,
           variant: item.variant,
+          src: item.src || null,
         };
         setElements((prev) => [...prev, newItem]);
       }
@@ -235,120 +267,177 @@ export default function CanvasArea({
           onClick={() => setSelected(null)} // Klick auf Canvas deselektiert
         >
           {/* Layer 1: Räume (als tiefste Ebene) */}
-          <Layer>
-            {elements
-              .filter((el) => el.type === ItemTypes.ROOM)
-              .map((room) => (
-                <Group
-                  key={`room-${room.id}`}
-                  x={room.x}
-                  y={room.y}
-                  // Nur im BUILD-Modus ziehbar
-                  draggable={mode === EditorModes.BUILD}
-                  onDragEnd={(e) => handleDragEnd(e, room.id, room.type)}
-                  onClick={(e) => handleElementClick(e, room)}
-                  // Räume selbst haben keine Children-Elemente mehr, die Konva-Logik wurde vereinfacht
-                >
+          {/* Layer 1: Räume */}
+        <Layer>
+          {elements
+            .filter((el) => el.type === ItemTypes.ROOM)
+            .map((room) => (
+              <Group
+                key={`room-${room.id}`}
+                x={room.x}
+                y={room.y}
+                draggable={mode === EditorModes.BUILD}
+                onDragEnd={(e) => handleDragEnd(e, room.id, room.type)}
+                onClick={(e) => handleElementClick(e, room)}
+              >
+                {/* OPTION A: Bild vorhanden -> Zeige Bild */}
+                {room.src ? (
+                  <URLImage
+                    src={room.src} // Pfad zum Bild, z.B. "/assets/marble_floor.jpg"
+                    width={room.width}
+                    height={room.height}
+                    // Wir geben den Selection-Style an das Bild weiter
+                    stroke={selected?.id === room.id ? "#cfaa56" : "transparent"}
+                    strokeWidth={selected?.id === room.id ? 3 : 0}
+                    shadowColor="#cfaa56"
+                    shadowBlur={selected?.id === room.id ? 15 : 0}
+                  />
+                ) : (
+                  /* OPTION B: Kein Bild -> Fallback auf farbiges Rechteck (Dein altes Design) */
                   <Rect
                     width={room.width}
                     height={room.height}
-                    fill="#d0d7b3"
-                    stroke={selected?.id === room.id ? "lightgreen" : "black"}
-                    strokeWidth={selected?.id === room.id ? 4 : 1}
+                    fill="#1e293b" // Dunkles Design Farbe
+                    stroke={selected?.id === room.id ? "#cfaa56" : "#475569"}
+                    strokeWidth={selected?.id === room.id ? 2 : 1}
                   />
-                  {/* Optionale Text-Label für Räume */}
-                  <Text
-                    x={5}
-                    y={5}
-                    text={room.icon}
-                    fontSize={20}
-                    fill="black"
-                  />
-                </Group>
-              ))}
-          </Layer>
+                )}
+                
+                {/* Text/Icon bleibt drüber liegen */}
+                <Text
+                  x={5}
+                  y={5}
+                  text={room.icon} // Falls du das Icon trotzdem noch sehen willst
+                  fontSize={20}
+                  fill="rgba(255, 255, 255, 0.5)"
+                />
+              </Group>
+            ))}
+        </Layer>
 
           {/* Layer 2: Objekte (Freistehend & in Räumen, über Räumen) */}
-          <Layer>
-            {elements
-              .filter((el) => el.type === ItemTypes.OBJECT)
-              .map((obj) => {
-                const isContained = elements.some((e) => e.id === obj.roomId && e.type === ItemTypes.ROOM);
-                const absPos = isContained ? getAbsolutePos(obj, elements) : { x: obj.x, y: obj.y };
-                //console.log(obj);
-                return (
-                  <Group
-                    key={obj.id}
-                    x={absPos.x}
-                    y={absPos.y}
-                    draggable={mode === EditorModes.BUILD}
-                    onDragEnd={(e) => handleDragEnd(e, obj.id, obj.type)}
-                    onClick={(e) => handleElementClick(e, obj)}
-                  >
-                    <Rect
-                      // Objekt-Größe aus dem Element-State
-                      width={obj.width*40 || 70}
-                      height={obj.height*40 || 70}
-                      fill="lightgray"
-                      stroke={selected?.id === obj.id ? "orange" : "black"}
-                      strokeWidth={selected?.id === obj.id ? 4 : 1}
-                    />
-                    <Text
-                      x={5}
-                      y={5}
-                      text={obj.icon}
-                      fontSize={20}
-                      fill="black"
-                    />
-                  </Group>
-                );
-              })}
-          </Layer>
+          {/* Layer 2: Objekte (Freistehend & in Räumen, über Räumen) */}
+        <Layer>
+          {elements
+            .filter((el) => el.type === ItemTypes.OBJECT)
+            .map((obj) => {
+              const isContained = elements.some((e) => e.id === obj.roomId && e.type === ItemTypes.ROOM);
+              const absPos = isContained ? getAbsolutePos(obj, elements) : { x: obj.x, y: obj.y };
+              const isSelected = selected?.id === obj.id;
 
+              // Größe berechnen (damit wir es nicht doppelt schreiben müssen)
+              const displayWidth = obj.width * 40 || 70;
+              const displayHeight = obj.height * 40 || 70;
+
+              return (
+                <Group
+                  key={obj.id}
+                  x={absPos.x}
+                  y={absPos.y}
+                  draggable={mode === EditorModes.BUILD}
+                  onDragEnd={(e) => handleDragEnd(e, obj.id, obj.type)}
+                  onClick={(e) => handleElementClick(e, obj)}
+                >
+                  {/* ENTWEDER: Bild anzeigen, falls src vorhanden */}
+                  {obj.src ? (
+                    <URLImage
+                      src={obj.src}
+                      width={obj.width}
+                      height={obj.height}
+                      // Selection-Style für das Bild
+                      stroke={isSelected ? "#cfaa56" : "#475569"}
+                      strokeWidth={isSelected ? 2 : 0}
+                      shadowColor="#cfaa56"
+                      shadowBlur={isSelected ? 10 : 0}
+                    />
+                  ) : (
+                    /* ODER: Standard Rechteck + Text anzeigen */
+                    <>
+                      <Rect
+                        width={obj.width}
+                        height={obj.height}
+                        fill="lightgray"
+                        stroke={isSelected ? "#cfaa56" : "#475569"}
+                        strokeWidth={isSelected ? 2 : 1}
+                      />
+                      <Text
+                        x={5}
+                        y={5}
+                        text={obj.icon}
+                        fontSize={20}
+                        fill="black"
+                      />
+                    </>
+                  )}
+                </Group>
+              );
+            })}
+        </Layer>
           {/* Layer 3: Anker (Freistehend, in Räumen & in Objekten, über Objekten) */}
-          <Layer>
-            {elements
-              .filter((el) => el.type === ItemTypes.ANCHOR)
-              .map((anch) => {
-                const abs = getAbsolutePos(anch, elements);
-                const isSelected = selected?.id === anch.id;
-                const isUsed = isAnchorUsedAsSource(anch.id);
-                const strokeColor = isSelected
-                  ? "red"
-                  : isUsed && mode === EditorModes.CONNECT
-                  ? "darkgray"
-                  : "transparent";
+        <Layer>
+          {elements
+            .filter((el) => el.type === ItemTypes.ANCHOR)
+            .map((anch) => {
+              const abs = getAbsolutePos(anch, elements);
+              const isSelected = selected?.id === anch.id;
+              const isUsed = isAnchorUsedAsSource(anch.id);
 
-                return (
-                  <Group
-                    key={anch.id}
-                    x={abs.x}
-                    y={abs.y}
-                    draggable={mode === EditorModes.BUILD}
-                    onDragEnd={(e) => handleDragEnd(e, anch.id, anch.type)}
-                    onClick={(e) => handleElementClick(e, anch)}
-                    onMouseDown={() => handleAnchorMouseDown(anch)}
-                  >
-                    {/* Unsichtbarer Kreis für einfacheren Klick-/Drag-Bereich und Connection-Ziel */}
-                    <Rect
-                      width={32}
-                      height={32}
-                      fill="transparent"
+              // Logik für die Randfarbe (Selection oder Connection-Modus)
+              const strokeColor = isSelected
+                ? "#cfaa56"
+                : isUsed && mode === EditorModes.CONNECT
+                ? "darkgray"
+                : "transparent";
+
+              // Logik für die Randdicke (damit wir sie nicht doppelt schreiben müssen)
+              const strokeWidth = mode === EditorModes.CONNECT || isSelected ? 2 : 1;
+
+              return (
+                <Group
+                  key={anch.id}
+                  x={abs.x}
+                  y={abs.y}
+                  draggable={mode === EditorModes.BUILD}
+                  onDragEnd={(e) => handleDragEnd(e, anch.id, anch.type)}
+                  onClick={(e) => handleElementClick(e, anch)}
+                  onMouseDown={() => handleAnchorMouseDown(anch)}
+                >
+                  {/* ENTWEDER: Bild anzeigen, falls src vorhanden */}
+                  {anch.src ? (
+                    <URLImage
+                      src={anch.src}
+                      width={anch.width} // Feste Größe für Anker (oder anch.width nutzen)
+                      height={anch.height}
                       stroke={strokeColor}
-                      strokeWidth={mode === EditorModes.CONNECT || isSelected ? 3 : 1}
-                      cornerRadius={4}
+                      strokeWidth={strokeWidth}
+                      shadowColor="#cfaa56"
+                      shadowBlur={isSelected ? 10 : 0}
                     />
-                    <Text
-                      x={3}
-                      y={3}
-                      text={anch.icon}
-                      fontSize={24}
-                      fill="black"
-                    />
-                  </Group>
-                );
-              })}
-          </Layer>
+                  ) : (
+                    /* ODER: Standard Rechteck (unsichtbar oder Rand) + Text Icon */
+                    <>
+                      <Rect
+                        width={32}
+                        height={32}
+                        fill="transparent"
+                        stroke={strokeColor}
+                        strokeWidth={strokeWidth}
+                        shadowColor="#cfaa56"
+                        shadowBlur={isSelected ? 10 : 0}
+                      />
+                      <Text
+                        x={3}
+                        y={3}
+                        text={anch.icon}
+                        fontSize={24}
+                        fill="black"
+                      />
+                    </>
+                  )}
+                </Group>
+              );
+            })}
+        </Layer>
 
           {/* Layer 4: ConnectionsLayer (Als oberste Ebene) */}
           <ConnectionsLayer

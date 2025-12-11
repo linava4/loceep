@@ -1,4 +1,6 @@
-.container{
+/* --- NAVBAR STYLING --- */
+
+.container {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,86 +10,150 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 60px;
-  background-color: #c0caa9;
-  z-index: 1000;
-  border-bottom:2px solid #f4f4ee;;
   
+  background-color: #111827;
+  z-index: 1000;
+  border-bottom: 1px solid #cfaa56;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: #e2e8f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.logo{
+.logo {
   font-weight: bold;
   font-size: 22px;
+  color: #cfaa56;
+  text-shadow: 0 0 10px rgba(207, 170, 86, 0.3);
+  letter-spacing: 0.05em;
 }
 
-.links{
+.links {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
+/* Links im normalen Zustand */
+.links a, .link {
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.links a:hover, .link:hover {
+  color: #cfaa56;
+}
+
 /* Hamburger */
-.hamburger{
+.hamburger {
   display: none;
   flex-direction: column;
   cursor: pointer;
   gap: 5px;
 }
-.hamburger span{
+
+.hamburger span {
   width: 25px;
   height: 3px;
-  background-color: black;
+  background-color: #cfaa56;
   border-radius: 2px;
+  transition: all 0.3s;
+  box-shadow: 0 0 5px rgba(207, 170, 86, 0.4);
 }
 
 /* Logout Button */
-.logout{
-  padding: 5px;
-  border: none;
+.logout {
+  padding: 6px 12px;
+  border: 1px solid #ef4444;
   background-color: transparent;
-  color: black;
+  color: #ef4444;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-size: 0.9rem;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px){
-  .hamburger{
+.logout:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+/* --- RESPONSIVE BEREICH --- */
+@media (max-width: 768px) {
+  .hamburger {
     display: flex;
   }
 
-  .links{
+  .links {
     gap: 0px;
-    position:absolute;
-    top: 100%;
+    position: absolute;
+    top: 70px;
     right: 0;
-    background-color: #c0caa9; /* #f4f4ee*/
+    background-color: #111827; 
+    border: 1px solid #cfaa56;
+    border-top: none;
+    border-bottom-left-radius: 8px;
     flex-direction: column;
     align-items: center;
-    width: 150px;
-    display: none; /* initially hidden */
-    border-radius: 4px;
-    border: 2px #f4f4ee solid;
+    width: 200px;
+    display: none;
+    padding-bottom: 10px;
+    box-shadow: -5px 10px 15px rgba(0,0,0,0.5);
   }
   
-  .links .link {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  width: 100%;
-  text-align: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #f4f4ee; /* Trennstrich */
-}
-
-.links .link:last-child{
-  border-bottom: none;
-}
-
-  .links.active{
-    display: flex; /* show menu when active */
+  .links .link, .links a {
+    color: #e2e8f0;
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #374151;
   }
 
-  .links .link:hover {
-  background-color: #e2e2db;
+  .links .link:last-child, .links a:last-child {
+    border-bottom: none;
+  }
+
+  .links.active {
+    display: flex;
+  }
+
+  .links .link:hover, .links a:hover {
+    background-color: rgba(207, 170, 86, 0.1);
+    color: #cfaa56;
+  }
+} /* <--- WICHTIG: Hier wird der Mobile-Bereich geschlossen! */
+
+
+/* --- ACTIVE STATES (GLOBAL & SPECIFIC) --- */
+
+/* Basis Style für active (muss NACH den normalen Link-Styles stehen) */
+.activeLink {
+  color: #cfaa56 !important; /* !important überschreibt Standardfarben sicher */
+  font-weight: bold;
+  position: relative;
 }
+
+/* Desktop-spezifischer Effekt (Unterstreichung) */
+@media (min-width: 769px) {
+  .activeLink::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #cfaa56;
+    box-shadow: 0 0 8px rgba(207, 170, 86, 0.6);
+  }
+}
+
+/* Mobile-spezifischer Effekt (Hintergrund/Balken) */
+@media (max-width: 768px) {
+  .links .activeLink {
+    background-color: rgba(207, 170, 86, 0.15);
+    border-left: 3px solid #cfaa56;
+    color: #cfaa56 !important;
+  }
 }

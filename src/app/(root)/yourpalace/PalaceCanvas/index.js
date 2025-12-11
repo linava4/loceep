@@ -111,7 +111,10 @@ export default function YourPalace() {
           width: Number(room.WIDTH) * GRID_SIZE,
           height: Number(room.HEIGHT) * GRID_SIZE,
           variant: room.ROOM_ID,
+          src: room.SRC || null,
         }));
+
+        console.log("Gefetchte Räume aus DB:", dbRooms);
 
         setSidebarItems((prev) =>
           prev.map((section) =>
@@ -137,6 +140,7 @@ export default function YourPalace() {
           width: Number(anchor.WIDTH),
           height: Number(anchor.HEIGHT),
           variant: anchor.ANCHOR_ID,
+          src: anchor.SRC || null,
         }));
 
         setSidebarItems((prev) =>
@@ -163,6 +167,7 @@ export default function YourPalace() {
           width: Number(obj.WIDTH), // kleine Objekte (Anker-Style) vs. große Objekte (Raum-Style)
           height: Number(obj.HEIGHT),
           variant: obj.OBJECT_ID,
+          src: obj.SRC || null,
         }));
 
         setSidebarItems((prev) =>
