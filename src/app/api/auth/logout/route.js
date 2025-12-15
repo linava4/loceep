@@ -21,14 +21,21 @@ export async function POST() {
             await db.query(sqlDeleteSession, [sessionId]);
         }
 
+        console.log("Logout: Session in DB invalidiert");
         // 2. Cookie im Browser löschen/invalidieren
-        cookieStore.set('session', '', { 
-            expires: new Date(0), // Setzt das Ablaufdatum auf die Vergangenheit
-            path: '/', 
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Lax',
-        });
+        cookieStore.set('session', '', {
+        path: '/',            // Passt (Slash nach localhost)
+        maxAge: 0,            // Sofort löschen
+        expires: new Date(0), // Sicherheitshalber
+        
+        httpOnly: true,       // Passt (✓ im Browser)
+        
+        // WICHTIG: Muss true sein, weil im Browser ein Haken (✓) ist!
+        secure: true,         
+        
+        // WICHTIG: Muss 'strict' sein, weil im Browser "Strict" steht!
+        sameSite: 'strict'    
+    });
 
         // Erfolgreiche Antwort zurücksenden
         return NextResponse.json({ message: "Logout erfolgreich" }, { status: 200 });

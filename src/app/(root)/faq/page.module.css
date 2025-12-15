@@ -1,46 +1,58 @@
-/*für spezielles css für nur diese seite*/
-.container{
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
+/* --- CONTAINER --- */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  min-height: 90vh;
+  /* padding-top sorgt für etwas Abstand nach oben */
+  padding-top: 60px; 
+  background-color: #0b0f19;
+  color: #e2e8f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.form{
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+/* --- NEUER HEADER STYLE --- */
+.header {
+  width: 100%;
+  max-width: 600px; /* Gleiche Breite wie die FAQ Liste */
+  margin-bottom: 20px;
+  border-bottom: 1px solid #374151;
+  padding-bottom: 20px;
+  text-align: left; /* Linksbuendig wirkt technischer/sauberer */
 }
 
-.input{
-    padding: 20px;
-    background-color: transparent;
-    border: 2px solid #bbb;
-    border-radius: 5px;
-    font-size: 20px;
-    font-weight: bold;
+.header h2 {
+  font-size: 28px;
+  font-weight: 300;
+  color: #cfaa56; /* Gold */
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 0;
 }
 
-.button{
-    width: 300px;
-    padding: 20px;
-    cursor: pointer;
-    background-color: #53c28b;
-    border: none;
-    border-radius: 5px;
-    color: #eee;
-    font-weight: bold;
+.header p {
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* --- FAQ BEREICH --- */
+.faqList {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .faqItem {
   margin-bottom: 1rem;
   margin-top: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #374151;
   padding-bottom: 0.5rem;
-  width: 40vw;
+  width: 100%;
 }
+
 .faqQuestion {
   background: none;
   border: none;
@@ -52,16 +64,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #e2e8f0;
+  font-weight: 500;
+  transition: color 0.2s;
 }
+
+.faqQuestion:hover {
+  color: #cfaa56; /* Gold Hover */
+}
+
 .faqArrow {
-  font-size: 1rem;
+  font-size: 0.8rem; /* Etwas kleinerer Pfeil wirkt edler */
   margin-left: 0.5rem;
+  color: #cfaa56;
 }
+
 .faqAnswer {
   margin-top: 0.5rem;
-  color: #444;
-}
-.faqList {
-  max-width: 600px;
-  margin: 0 auto;
+  color: #94a3b8;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }

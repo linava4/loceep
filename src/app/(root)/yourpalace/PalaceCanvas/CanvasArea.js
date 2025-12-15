@@ -97,6 +97,7 @@ export default function CanvasArea({
           height: item.height || GRID_SIZE,
           variant: item.variant,
           src: item.src || null,
+          name: item.name || "",
         };
 
         console.log("Drop-Position (ungesnappt):", item);
@@ -123,6 +124,7 @@ export default function CanvasArea({
           roomId: parent.id, // Parent-ID
           variant: item.variant,
           src: item.src || null,
+          name: item.name || "",
         };
         
         console.log(newItem);
@@ -140,6 +142,7 @@ export default function CanvasArea({
           roomId: null,
           variant: item.variant,
           src: item.src || null,
+          name: item.name || "",
         };
         setElements((prev) => [...prev, newItem]);
       }

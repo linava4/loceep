@@ -1,104 +1,114 @@
-/* page.module.css */
-
-/* Ganze Seite */
+/* --- LAYOUT & BACKGROUND --- */
 .container {
   display: flex;
   width: 100vw;
-  height: 100vh;
-  font-family: 'Arial', sans-serif;
+  height: 90vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0b0f19;
+  color: #e2e8f0;
+  overflow: hidden;
 }
 
-/* Sidebar */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 180px;
-  height: 100%;
-  background-color: #c0caa9;
-  background: linear-gradient(to bottom, #c0caa9 0%, transparent 100%);
-  border-right: 2px solid #fff;
+.loadingState {
+   width: 100vw; height: 100vh; display: flex; 
+   justify-content: center; align-items: center; 
+   background-color: #0b0f19; color: #cfaa56;
 }
 
-
-
-.sidebar img {
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-/* Sidebar Links / Buttons */
-.button {
- text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  width: 100%;
-  text-align: center;
-  border-top: 1px solid #f4f4ee;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.button:last-child{
-    border-bottom: 1px solid #f4f4ee;
-}
-
-.button:hover {
-  background-color: #e2e2db;
-}
-
-/* Main Content */
+/* --- MAIN CONTENT --- */
 .main {
   flex: 1;
   padding: 60px 80px;
-  
-}
-
-/* Titel */
-.main h2 {
-  font-size: 20px;
-  margin-bottom: 25px;
-  font-weight: 400;
-}
-
-/* Form */
-.form {
+  /* Konsistenter Hintergrund */
+  background: radial-gradient(circle at 70% 20%, #1b2745 0%, #0b0f19 80%);
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 40vw;
+  flex-direction: column; /* Wichtig für Header oben */
+  overflow-y: auto;
 }
 
-.form p {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
+/* --- HEADER (Neu eingefügt, passend zu Saved Palaces) --- */
+.header {
+   margin-bottom: 40px;
+   border-bottom: 1px solid #374151;
+   padding-bottom: 20px;
 }
 
-.input {
-  padding: 10px 15px;
-  border-radius: 20px;
-  border: 1px solid #999;
-  font-size: 14px;
-  outline: none;
+.header h2 {
+  font-size: 28px;
+  font-weight: 300;
+  color: #cfaa56; /* Gold */
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-/* Save button */
-.form button {
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid #999;
-  border-radius: 2px;
-  background-color: #e8ead9;
-  cursor: pointer;
-  font-size: 15px;
+.header p {
+   color: #94a3b8;
+   font-size: 14px;
 }
 
-/* Forgot Password Link */
-.forgot {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #333;
-  text-decoration: underline;
-  cursor: pointer;
+/* --- CARD --- */
+.card {
+    background-color: rgba(31, 41, 55, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 30px 40px;
+    width: 100%;
+    max-width: 100vw;
+    max-height: 60vh;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    align-self: center; /* Karte beginnt linksbündig unter dem Header, oder 'center' */
+}
+
+/* Avatar Styling (angepasst für innerhalb der Karte) */
+.avatarContainer {
+    display: flex;
+    justify-content: start;
+    margin-bottom: 15px;
+}
+
+.avatarPlaceholder {
+    width: 60px; height: 60px; 
+    border-radius: 50%;
+    border: 1px solid #cfaa56; 
+    color: #cfaa56;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(207, 170, 86, 0.1);
+    box-shadow: 0 0 15px rgba(207, 170, 86, 0.2);
+}
+.avatarPlaceholder svg { width: 40px; height: 40px; }
+
+/* --- FORM & INPUTS --- */
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fullWidth { grid-column: span 2; }
+.inputGroup { display: flex; flex-direction: column; gap: 8px; }
+.inputGroup label { font-size: 12px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; }
+
+.inputGroup input {
+    background-color: #111827; border: 1px solid #374151;
+    border-radius: 4px; padding: 12px; color: #fff; outline: none; transition: 0.3s;
+}
+.inputGroup input:focus { border-color: #cfaa56; box-shadow: 0 0 10px rgba(207, 170, 86, 0.2); }
+
+/* --- BUTTONS --- */
+.actions { display: flex; align-items: center; margin-top: 20px; }
+.forgot { color: #64748b; font-size: 12px; cursor: pointer; margin-right: auto; transition: 0.2s;}
+.forgot:hover { color: #cfaa56; text-decoration: underline; }
+
+.saveButton {
+    background: linear-gradient(180deg, #eecda3 0%, #dbbf86 100%);
+    color: #0b0f19; border: 1px solid #cfaa56;
+    padding: 12px 32px; font-weight: 700; text-transform: uppercase;
+    border-radius: 4px; cursor: pointer; transition: 0.3s;
+}
+.saveButton:hover { filter: brightness(1.1); box-shadow: 0 0 15px rgba(207, 170, 86, 0.4); }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .main { padding: 30px; }
+    .formGrid { grid-template-columns: 1fr; } 
+    .fullWidth { grid-column: span 1; }
+    .actions { flex-direction: column-reverse; gap: 20px; }
+    .forgot { margin-right: 0; }
 }

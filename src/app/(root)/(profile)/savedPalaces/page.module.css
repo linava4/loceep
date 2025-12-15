@@ -1,147 +1,182 @@
-/* page.module.css */
-
-/* Ganze Seite */
+/* Nur Layout Reset & Main Content behalten */
 .container {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  font-family: 'Arial', sans-serif;
+  display: flex; width: 100vw; height: 90vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0b0f19;
+  color: #e2e8f0;
 }
 
-/* Sidebar */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 180px;
-  height: 100%;
-  background-color: #c0caa9;
-  background: linear-gradient(to bottom, #c0caa9 0%, transparent 100%);
-  border-right: 2px solid #fff;
+.main {
+  flex: 1; padding: 60px 60px; display: flex; flex-direction: column; overflow: hidden;
+  /* Hintergrund hier oder im Sidebar Component für globalen Look festlegen */
+  background: radial-gradient(circle at 70% 20%, #1b2745 0%, #0b0f19 80%);
 }
 
+.header { margin-bottom: 40px; border-bottom: 1px solid #374151; padding-bottom: 20px; }
+.header h2 { font-size: 28px; font-weight: 300; color: #cfaa56; margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase; }
+.header p { color: #94a3b8; font-size: 14px; }
 
-
-.sidebar img {
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-/* Sidebar Links / Buttons */
-.button {
- text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  width: 100%;
-  text-align: center;
-  border-top: 1px solid #f4f4ee;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.button:last-child{
-    border-bottom: 1px solid #f4f4ee;
-}
-
-.button:hover {
-  background-color: #e2e2db;
-}
-
-/* Main Content */
+/* --- Main Content Area --- */
 .main {
   flex: 1;
   padding: 60px 80px;
-  
-}
-
-/* Titel */
-.main h2 {
-  font-size: 20px;
-  margin-bottom: 25px;
-  font-weight: 400;
-}
-
-/* Form */
-.form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 40vw;
+  overflow: hidden; 
 }
 
-.form p {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
+.header {
+   margin-bottom: 40px;
+   border-bottom: 1px solid #374151;
+   padding-bottom: 20px;
 }
 
-.input {
-  padding: 10px 15px;
-  border-radius: 20px;
-  border: 1px solid #999;
-  font-size: 14px;
-  outline: none;
+.header h2 {
+  font-size: 28px;
+  font-weight: 300;
+  color: #cfaa56; /* Goldene Überschrift */
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-/* Save button */
-.form button {
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid #999;
-  border-radius: 2px;
-  background-color: #e8ead9;
-  cursor: pointer;
-  font-size: 15px;
+.header p {
+   color: #94a3b8; /* Subtext Grau-Blau */
+   font-size: 14px;
 }
 
-/* Forgot Password Link */
-.forgot {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #333;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
+/* --- List & Cards --- */
 .listContainer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: 40vw;
-
-  /* NEU: Scrollen für vertikalen Überlauf */
-  overflow-y: auto; 
-  /* NEU: Falls der Inhalt die Mindesthöhe überschreiten muss */
-  max-height: 70vh; /* Oder die Höhe des .container-Elternteils */
+  gap: 16px;
+  width: 100%;
+  max-width: 100vw; 
+  
+  /* Scrollverhalten */
+  overflow-y: auto;
+  padding: 10px; 
+  padding-bottom: 40px;
+  
+  /* Scrollbar styling für Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #374151 #0b0f19;
 }
 
-.listItem {
+/* Scrollbar für Webkit (Chrome/Safari) */
+.listContainer::-webkit-scrollbar {
+  width: 8px;
+}
+.listContainer::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+.listContainer::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+
+.emptyState {
+   color: #64748b;
+   font-style: italic;
+   text-align: center;
+   margin-top: 40px;
+}
+
+/* --- Die einzelne Karte (Data Panel Style) --- */
+.card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+  
+  /* Glass / Dark Panel */
+  background-color: rgba(31, 41, 55, 0.6); 
+  backdrop-filter: blur(5px);
+  
+  padding: 20px 24px;
+  border-radius: 6px; /* Nur leicht abgerundet */
+  border: 1px solid #374151; /* Dunkler Rand */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: #cfaa56; /* Goldener Rand beim Hover */
+  box-shadow: 0 0 15px rgba(207, 170, 86, 0.15); /* Goldener Glow */
+  background-color: rgba(31, 41, 55, 0.9);
+}
+
+.cardContent {
+   display: flex;
+   align-items: center;
+   gap: 20px;
+}
+
+.palaceIcon {
+   font-size: 24px;
+   background-color: #111827; /* Dunkler Kreis */
+   width: 50px;
+   height: 50px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   border-radius: 50%;
+   border: 1px solid #374151;
+   color: #cfaa56; /* Goldenes Icon */
+}
+
+.card:hover .palaceIcon {
+  border-color: #cfaa56;
+  color: #fff;
+  background: linear-gradient(135deg, #cfaa56 0%, #b88a44 100%); /* Icon wird Gold gefüllt */
 }
 
 .name {
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e2e8f0; /* Heller Text */
+  letter-spacing: 0.5px;
 }
 
-.icons {
+/* --- Buttons / Icons --- */
+.actions {
   display: flex;
-  gap: 10px;
+  gap: 15px;
 }
 
-.icon {
-  cursor: pointer;
-  color: gray;
-  transition: color 0.2s;
+.actionButton {
+   background: none;
+   border: none;
+   cursor: pointer;
+   width: 40px;
+   height: 40px;
+   border-radius: 6px; /* Eckig statt rund */
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   transition: all 0.2s;
+   font-size: 18px;
 }
 
-.icon:hover {
-  color: black;
+/* Select / Load Button Styles (Gold) */
+.btnSelect {
+   border: 1px solid #cfaa56;
+   color: #cfaa56;
 }
 
+.btnSelect:hover {
+   background: linear-gradient(180deg, #eecda3 0%, #dbbf86 100%);
+   color: #0b0f19; /* Dunkles Icon auf Gold */
+   box-shadow: 0 0 10px rgba(207, 170, 86, 0.4);
+}
 
+/* Delete Button Styles (Red) */
+.btnDelete {
+   border: 1px solid #ef4444;
+   color: #ef4444;
+}
+
+.btnDelete:hover {
+   background-color: rgba(239, 68, 68, 0.2);
+   box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}

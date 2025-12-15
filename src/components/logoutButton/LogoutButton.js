@@ -35,7 +35,7 @@ export default function LogoutButton() {
         <a 
             href="#" // Standardmäßig verweist er auf sich selbst
             onClick={handleLogout} 
-            className={style.button}
+            className= {style.logout}
         >
             Log-out
         </a>

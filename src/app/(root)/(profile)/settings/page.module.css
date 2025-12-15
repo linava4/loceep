@@ -1,106 +1,121 @@
-/* page.module.css */
-
-/* Ganze Seite */
+/* --- LAYOUT & BACKGROUND --- */
 .container {
   display: flex;
   width: 100vw;
-  height: 100vh;
-  font-family: 'Arial', sans-serif;
+  height: 90vh;
+  background-color: #0b0f19;
+  color: #e2e8f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
 }
 
-/* Sidebar */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 180px;
-  height: 100%;
-  background-color: #c0caa9;
-  background: linear-gradient(to bottom, #c0caa9 0%, transparent 100%);
-  border-right: 2px solid #fff;
-}
-
-
-
-.sidebar img {
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-/* Sidebar Links / Buttons */
-.button {
- text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  width: 100%;
-  text-align: center;
-  border-top: 1px solid #f4f4ee;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.button:last-child{
-    border-bottom: 1px solid #f4f4ee;
-}
-
-.button:hover {
-  background-color: #e2e2db;
-}
-
-/* Main Content */
+/* --- MAIN CONTENT --- */
 .main {
   flex: 1;
   padding: 60px 80px;
-  
-}
-
-/* Titel */
-.main h2 {
-  font-size: 20px;
-  margin-bottom: 25px;
-  font-weight: 400;
-}
-
-/* Form */
-.form {
+  background: radial-gradient(circle at 70% 20%, #1b2745 0%, #0b0f19 80%);
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 40vw;
+  overflow-y: auto;
 }
 
-.form p {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
+/* --- HEADER (Neu) --- */
+.header {
+   margin-bottom: 40px;
+   border-bottom: 1px solid #374151;
+   padding-bottom: 20px;
 }
 
-.input {
-  padding: 10px 15px;
-  border-radius: 20px;
-  border: 1px solid #999;
-  font-size: 14px;
-  outline: none;
+.header h2 {
+  font-size: 28px;
+  font-weight: 300;
+  color: #cfaa56; /* Gold */
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-/* Save button */
-.form button {
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid #999;
-  border-radius: 2px;
-  background-color: #e8ead9;
-  cursor: pointer;
-  font-size: 15px;
+.header p {
+   color: #94a3b8;
+   font-size: 14px;
 }
 
-/* Forgot Password Link */
-.forgot {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #333;
-  text-decoration: underline;
-  cursor: pointer;
+/* --- CARD --- */
+.card {
+    background-color: rgba(31, 41, 55, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 40px 50px;
+    width: 100%;
+   
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    align-self: flex-start;
 }
 
+/* --- ICON / DECORATION --- */
+.iconContainer {
+    display: flex;
+    justify-content: start;
+    margin-bottom: 15px;
+}
 
+.iconPlaceholder {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 1px solid #cfaa56;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    background: rgba(207, 170, 86, 0.1);
+    box-shadow: 0 0 15px rgba(207, 170, 86, 0.2);
+    user-select: none;
+    color: #cfaa56;
+}
+
+/* --- FORM ELEMENTS --- */
+.form { display: flex; flex-direction: column; gap: 20px; }
+
+.inputGroup { display: flex; flex-direction: column; gap: 10px; }
+.inputGroup label { font-size: 12px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; }
+
+.select {
+    background-color: #111827; border: 1px solid #374151;
+    border-radius: 4px; padding: 10px; color: #fff; outline: none;
+    font-size: 15px; cursor: pointer; appearance: none;
+    /* Custom Arrow Hack (optional) */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cfaa56%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;
+}
+.select:focus { border-color: #cfaa56; box-shadow: 0 0 10px rgba(207, 170, 86, 0.2); }
+
+/* --- DIVIDER --- */
+.divider { border: 0; border-top: 1px solid #374151; margin: 10px 0; }
+
+/* --- DANGER ZONE --- */
+.dangerZone {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(239, 68, 68, 0.05); /* Sehr leichtes Rot */
+    padding: 15px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.dangerText { display: flex; flex-direction: column; gap: 4px; }
+.dangerLabel { color: #ef4444; font-weight: bold; font-size: 14px; text-transform: uppercase;}
+.dangerDesc { color: #94a3b8; font-size: 12px; }
+
+.deleteButton {
+    background-color: transparent; border: 1px solid #ef4444; color: #ef4444;
+    padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
+    transition: 0.2s;
+}
+.deleteButton:hover { background-color: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+
+/* --- FOOTER --- */
+.footer { margin-top: 30px; border-top: 1px solid #374151; padding-top: 15px; }
+.forgot { color: #64748b; font-size: 12px; cursor: pointer; transition: 0.2s; }
+.forgot:hover { color: #cfaa56; text-decoration: underline; }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .main { padding: 30px; }
+    .dangerZone { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .deleteButton { width: 100%; text-align: center; }
+}

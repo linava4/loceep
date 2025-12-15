@@ -1,32 +1,42 @@
+/* global.css */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Globale Farbvariablen für das neue Design */
+  --background: #0b0f19;    /* Deep Space Blue */
+  --background-alt: #111827; /* Etwas helleres Dunkelgrau/Blau für Karten/Sidebar */
+  --foreground: #e2e8f0;    /* Helles Grau für Text */
+  --gold: #cfaa56;          /* Dein Gold-Ton */
+  --gold-glow: rgba(207, 170, 86, 0.3);
+  --border-color: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Wir erzwingen Dark Mode, daher keine @media queries mehr nötig */
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  height: 100%;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  
+  /* Neuer Hintergrund: Deep Space Gradient (feststehend beim Scrollen) */
+  background-color: var(--background);
+  background: radial-gradient(circle at 50% 30%, #1b2745 0%, #0b0f19 80%);
+  background-attachment: fixed; /* Wichtig: Gradient bleibt stehen beim Scrollen */
+  
+  /* Neue Schriftart */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background-image: url('./Background.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  
+  /* Das alte Bild entfernen wir, da wir jetzt den CSS-Gradienten nutzen */
+  /* background-image: url('./Background.jpg'); */ 
+  
   min-height: 100vh;
 }
 
@@ -39,20 +49,47 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: color 0.2s;
 }
 
-.container{
+a:hover {
+  color: var(--gold);
+}
+
+/* Globaler Container (Standard, falls kein spezifisches CSS Module genutzt wird) */
+.container {
+  /* padding-top entfernt, damit Landingpages oben bündig sein können */
   padding-top: 70px;
   max-width: 100vw;
   min-height: 100vh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* justify-content entfernt, damit Inhalte natürlich fließen */
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* --- SCROLLBAR STYLING (Chrome, Edge, Safari) --- */
+/* Damit der hässliche graue Balken nicht das Design ruiniert */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0f19; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151; 
+  border-radius: 5px;
+  border: 2px solid #0b0f19;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cfaa56; /* Wird Gold beim Anfassen */
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #374151 #0b0f19;
 }

@@ -8,10 +8,10 @@ export default function Home() {
   const infoRef = useRef(null);
 
   const scrollToInfo = () => {
-    const yOffset = -70; 
-    const y = infoRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    window.scrollTo({ top: y, behavior: 'smooth' });
+    // Diese eine Zeile erledigt alles automatisch
+    infoRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
 
    
 

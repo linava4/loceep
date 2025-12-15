@@ -1,3 +1,5 @@
+/* navbar.module.css */
+
 /* --- NAVBAR STYLING --- */
 
 .container {
@@ -5,44 +7,51 @@
   top: 0;
   left: 0;
   right: 0;   
-  height: 70px;
+  height: 70px; /* Leicht erhöht auf 80px (wie global padding-top), damit es luftiger wirkt */
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 60px;
   
-  background-color: #111827;
+  background-color: #111827; /* Dark Grey/Blue */
   z-index: 1000;
-  border-bottom: 1px solid #cfaa56;
+  border-bottom: 1px solid #cfaa56; /* Gold Border */
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   color: #e2e8f0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .logo {
-  font-weight: bold;
-  font-size: 22px;
+  font-weight: 300; /* Dünner wirkt oft edler bei großen Größen */
+  font-size: 24px;
   color: #cfaa56;
-  text-shadow: 0 0 10px rgba(207, 170, 86, 0.3);
-  letter-spacing: 0.05em;
+  text-shadow: 0 0 15px rgba(207, 170, 86, 0.4);
+  letter-spacing: 4px; /* Breiterer Abstand für Logo */
+  text-transform: uppercase;
 }
 
 .links {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 30px; /* Etwas mehr Abstand zwischen den Links */
 }
 
 /* Links im normalen Zustand */
 .links a, .link {
-  color: #e2e8f0;
+  color: #94a3b8; /* Kühles Grau für inaktive Links */
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
+  font-weight: 600;
+  font-size: 14px; /* Etwas kleiner, da Uppercase */
+  transition: all 0.3s ease;
+  
+  /* TYPOGRAFIE UPDATE */
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .links a:hover, .link:hover {
   color: #cfaa56;
+  text-shadow: 0 0 8px rgba(207, 170, 86, 0.4);
 }
 
 /* Hamburger */
@@ -50,12 +59,12 @@
   display: none;
   flex-direction: column;
   cursor: pointer;
-  gap: 5px;
+  gap: 6px;
 }
 
 .hamburger span {
   width: 25px;
-  height: 3px;
+  height: 2px; /* Etwas feiner */
   background-color: #cfaa56;
   border-radius: 2px;
   transition: all 0.3s;
@@ -64,7 +73,7 @@
 
 /* Logout Button */
 .logout {
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: 1px solid #ef4444;
   background-color: transparent;
   color: #ef4444;
@@ -72,16 +81,26 @@
   border-radius: 4px;
   font-weight: 600;
   transition: all 0.2s;
-  font-size: 0.9rem;
+  
+  /* TYPOGRAFIE UPDATE */
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .logout:hover {
   background-color: rgba(239, 68, 68, 0.1);
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
 }
 
 /* --- RESPONSIVE BEREICH --- */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 20px; /* Weniger Padding mobil */
+    height: 70px;
+  }
+
   .hamburger {
     display: flex;
   }
@@ -89,25 +108,26 @@
   .links {
     gap: 0px;
     position: absolute;
-    top: 70px;
+    top: 70px; /* Muss exakt Header Höhe sein */
     right: 0;
     background-color: #111827; 
-    border: 1px solid #cfaa56;
-    border-top: none;
+    border-left: 1px solid #cfaa56;
+    border-bottom: 1px solid #cfaa56;
     border-bottom-left-radius: 8px;
     flex-direction: column;
     align-items: center;
-    width: 200px;
+    width: 100%; /* Volle Breite mobil oft besser lesbar */
+    max-width: 300px;
     display: none;
-    padding-bottom: 10px;
-    box-shadow: -5px 10px 15px rgba(0,0,0,0.5);
+    padding-bottom: 20px;
+    box-shadow: -5px 10px 25px rgba(0,0,0,0.8);
   }
   
   .links .link, .links a {
-    color: #e2e8f0;
+    color: #94a3b8;
     width: 100%;
     text-align: center;
-    padding: 15px 0;
+    padding: 20px 0;
     border-bottom: 1px solid #374151;
   }
 
@@ -120,40 +140,40 @@
   }
 
   .links .link:hover, .links a:hover {
-    background-color: rgba(207, 170, 86, 0.1);
+    background-color: rgba(207, 170, 86, 0.05);
     color: #cfaa56;
   }
-} /* <--- WICHTIG: Hier wird der Mobile-Bereich geschlossen! */
+} 
 
 
 /* --- ACTIVE STATES (GLOBAL & SPECIFIC) --- */
 
-/* Basis Style für active (muss NACH den normalen Link-Styles stehen) */
+/* Basis Style für active */
 .activeLink {
-  color: #cfaa56 !important; /* !important überschreibt Standardfarben sicher */
-  font-weight: bold;
+  color: #cfaa56 !important;
+  font-weight: 700;
   position: relative;
 }
 
-/* Desktop-spezifischer Effekt (Unterstreichung) */
+/* Desktop-spezifischer Effekt (Unterstreichung / Glow) */
 @media (min-width: 769px) {
   .activeLink::after {
     content: '';
     position: absolute;
-    bottom: -5px;
+    bottom: -8px; /* Etwas tiefer wegen Uppercase */
     left: 0;
     width: 100%;
     height: 2px;
     background-color: #cfaa56;
-    box-shadow: 0 0 8px rgba(207, 170, 86, 0.6);
+    box-shadow: 0 0 10px rgba(207, 170, 86, 0.8);
   }
 }
 
-/* Mobile-spezifischer Effekt (Hintergrund/Balken) */
+/* Mobile-spezifischer Effekt */
 @media (max-width: 768px) {
   .links .activeLink {
-    background-color: rgba(207, 170, 86, 0.15);
-    border-left: 3px solid #cfaa56;
+    background-color: rgba(207, 170, 86, 0.1);
+    border-left: 4px solid #cfaa56;
     color: #cfaa56 !important;
   }
 }

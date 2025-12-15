@@ -95,7 +95,7 @@ export async function POST(request) {
     }
 
     // Palast prüfen oder anlegen
-    const [existingPalace] = await db.query(existsPalace, [name, ]);
+    const [existingPalace] = await db.query(existsPalace, [name, userId ]);
     let palaceId;
 
     if (existingPalace.length) {

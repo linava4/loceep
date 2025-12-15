@@ -1,10 +1,8 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import { FaCheck, FaTrash } from "react-icons/fa"; // Icons für auswählen und löschen
-
+import { FaCheck, FaTrash } from "react-icons/fa"; 
 import style from './page.module.css';
-import Link from "next/link";
-import Image from 'next/image';
+import Sidebar from "@/components/sidebar/Sidebar"; // NEU
 
 const ItemList = () => {
   const [items, setItems] = useState([]);
@@ -18,7 +16,6 @@ const ItemList = () => {
         });
 
         const data = await res.json();
-        
 
         const dbPalaces = data.map((palace) => ({
           id: palace.PALACE_ID,
@@ -26,94 +23,89 @@ const ItemList = () => {
         }));
 
         console.log("Geladene Items:", dbPalaces);
-
         setItems(dbPalaces);
       } catch (error) {
         console.error("Fehler beim Laden der Paläste:", error);
       }
     };
     fetchData();
-    
   }, []);
 
- const handleSelect = async (palaceId) => {
-  try {
-    const res = await fetch(`/api/load-palace?palaceId=${palaceId}`);
-    if (!res.ok) throw new Error("Fehler beim Laden");
-    const data = await res.json();
-    console.log("Palastdaten:", data);
-    console.log("Palastdaten:", palaceId);
-
-    // Im LocalStorage speichern (oder über Context)
-    localStorage.setItem("palaceId", JSON.stringify(palaceId));
-
-    // Weiterleitung zur Canvas-Seite
-    window.location.href = "/yourpalace";
-  } catch (err) {
-    console.error("Fehler beim Laden des Palastes:", err);
-  }
-};
-
+  const handleSelect = async (palaceId) => {
+    try {
+      const res = await fetch(`/api/load-palace?palaceId=${palaceId}`);
+      if (!res.ok) throw new Error("Fehler beim Laden");
+      const data = await res.json();
+      console.log("Palastdaten:", data);
+      
+      localStorage.setItem("palaceId", JSON.stringify(palaceId));
+      window.location.href = "/yourpalace";
+    } catch (err) {
+      console.error("Fehler beim Laden des Palastes:", err);
+    }
+  };
 
   const handleDelete = async (palaceId) => {
-  //aus UI entfernen (optimistic update)
-  setItems((prev) => prev.filter((item) => item.id !== palaceId));
+    setItems((prev) => prev.filter((item) => item.id !== palaceId));
 
-  try {
-    const res = await fetch("/api/delete-palace", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ palaceId }),
-    });
+    try {
+      const res = await fetch("/api/delete-palace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ palaceId }),
+      });
 
-    if (!res.ok) {
-      throw new Error(`Fehler beim Löschen (Status ${res.status})`);
+      if (!res.ok) {
+        throw new Error(`Fehler beim Löschen (Status ${res.status})`);
+      }
+      const data = await res.json();
+      console.log("Palast gelöscht:", data.message);
+    } catch (err) {
+      console.error("Fehler beim Löschen:", err);
+      setItems((prev) => [...prev, items.find((i) => i.id === palaceId)]);
+      alert("Löschen fehlgeschlagen!");
     }
-
-    const data = await res.json();
-    console.log("Palast gelöscht:", data.message);
-  } catch (err) {
-    console.error("Fehler beim Löschen:", err);
-
-    // UI zurücksetzen, falls Fehler
-    setItems((prev) => [...prev, items.find((i) => i.id === palaceId)]);
-    alert("Löschen fehlgeschlagen!");
-  }
-};
-
+  };
   return (
     <div className={style.container}>
-      <div className={style.sidebar}>
-        <Image
-          src="/LOCeepLogo.png"
-          alt="Logo"
-          width={120}
-          height={80}
-        />
-        <Link href="/profile" className={style.button}>User Data</Link>
-        <Link href="/savedPalaces" className={style.button}>Saved Palaces</Link>
-        <Link href="/settings" className={style.button}>Settings</Link>
-        <Link href="/" className={style.button}>Log-out</Link>
-      </div>
+      <Sidebar /> {/* Sidebar statt hardcoded HTML */}
 
       <div className={style.main}>
-        <h2>Saved Palaces</h2>
+        <header className={style.header}>
+            <h2>Your Collection</h2>
+            <p>Select a Memory Palace to enter or manage your list.</p>
+        </header>
+
         <div className={style.listContainer}>
-          {items.map((item) => (
-            <div key={item.id} className={style.listItem}>
-              <span className={style.name}>{item.name}</span>
-              <div className={style.icons}>
-                <FaCheck
-                  className={style.icon}
-                  onClick={() => handleSelect(item.id)}
-                />
-                <FaTrash
-                  className={style.icon}
-                  onClick={() => handleDelete(item.id)}
-                />
-              </div>
-            </div>
-          ))}
+          {items.length === 0 ? (
+              <div className={style.emptyState}>No palaces saved yet.</div>
+          ) : (
+              items.map((item) => (
+                <div key={item.id} className={style.card}>
+                  <div className={style.cardContent}>
+                      <span className={style.palaceIcon}>🏰</span>
+                      <span className={style.name}>{item.name}</span>
+                  </div>
+                  
+                  <div className={style.actions}>
+                    <button 
+                        className={`${style.actionButton} ${style.btnSelect}`} 
+                        onClick={() => handleSelect(item.id)}
+                        title="Load Palace"
+                    >
+                      <FaCheck />
+                    </button>
+                    <button 
+                        className={`${style.actionButton} ${style.btnDelete}`} 
+                        onClick={() => handleDelete(item.id)}
+                        title="Delete Palace"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              ))
+          )}
         </div>
       </div>
     </div>

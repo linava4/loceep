@@ -1,35 +1,34 @@
 /* styles.module.css */
 
-/* --- GRUNDLAYOUT & FARBEN --- */
+/* --- GRUNDLAYOUT & FARBEN (Unverändert) --- */
 .container {
   display: flex;
-  height: 100vh;
   width: 100%;
+  height: 90vh;
   overflow: hidden;
-  gap: 0; /* Keine Lücke, Sidebar schließt direkt an */
-  background-color: #0b0f19; /* Deep Space Blue */
+  gap: 0;
+  background-color: #0b0f19;
   color: #e2e8f0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- CANVAS BEREICH --- */
+/* --- CANVAS BEREICH (Unverändert) --- */
 .canvasContainer {
-  flex: 1 1 auto;
+  flex: 1;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at center, #1b2745 0%, #0b0f19 100%); /* Leichter Verlauf */
-  /* Optional: Hier könnte man ein Sternenhimmel-Hintergrundbild einfügen */
+  background: radial-gradient(circle at center, #1b2745 0%, #0b0f19 100%);
+  overflow: hidden;
 }
 
 .canvasWrapper {
-  /* Der Rahmen um das Canvas (die goldene Linie im Bild) */
   width: 95%;
   height: 95%;
-  border: 1px solid #cfaa56; /* Mattes Gold */
+  border: 1px solid #cfaa56;
   border-radius: 8px;
-  box-shadow: 0 0 15px rgba(207, 170, 86, 0.1); /* Leichter Glow */
+  box-shadow: 0 0 15px rgba(207, 170, 86, 0.1);
   overflow: hidden;
   position: relative;
   background: rgba(0, 0, 0, 0.2);
@@ -41,10 +40,12 @@
   display: block;
 }
 
-/* --- SIDEBAR (RECHTS) --- */
+/* --- SIDEBAR (Unverändert) --- */
 .sidebar {
-  width: 300px; /* Etwas breiter wie im Bild */
-  background: #111827; /* Dunkler Hintergrund */
+  width: 300px;
+  min-width: 300px;
+  height: 100%;
+  background: #111827;
   border-left: 1px solid #374151;
   padding: 20px;
   display: flex;
@@ -54,7 +55,24 @@
   box-shadow: -5px 0 15px rgba(0,0,0,0.5);
 }
 
-/* --- INPUTS & LABELS --- */
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: #111827;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+
+/* --- INPUTS & BUTTONS (Unverändert) --- */
+.palaceNameInput,
+.section,
+.sidebarButtons {
+  flex-shrink: 0;
+}
+
 .sidebar label {
   font-size: 0.85rem;
   color: #94a3b8;
@@ -80,10 +98,9 @@
 .palaceNameInput input:focus,
 .infoBox input:focus,
 .infoBox textarea:focus {
-  border-color: #cfaa56; /* Goldener Fokus */
+  border-color: #cfaa56;
 }
 
-/* --- BUTTONS --- */
 .sidebarButtons {
   display: flex;
   flex-direction: column;
@@ -100,7 +117,6 @@
   border: none;
 }
 
-/* Save Button (Gold Gradient wie im Bild) */
 .sidebarButtons button:first-child {
   background: linear-gradient(180deg, #eecda3 0%, #dbbf86 100%);
   color: #1f2937;
@@ -111,10 +127,9 @@
   box-shadow: 0 0 10px rgba(219, 191, 134, 0.4);
 }
 
-/* Delete Button (Outline Style) */
 .sidebarButtons button:last-child {
   background: transparent;
-  border: 1px solid #ef4444; /* Rot */
+  border: 1px solid #ef4444;
   color: #ef4444;
 }
 .sidebarButtons button:last-child:hover:not(:disabled) {
@@ -127,7 +142,7 @@
   color: #555;
 }
 
-/* --- MODUS SCHALTER --- */
+/* --- MODUS SCHALTER (Unverändert) --- */
 .modeButtons {
   display: flex;
   background: #1f2937;
@@ -149,13 +164,82 @@
 
 .modeButtons .activeMode {
   background: #374151;
-  color: #cfaa56; /* Gold Text */
+  color: #cfaa56;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-/* --- DRAGGABLE ITEMS (Rooms, Objects, Anchors) --- */
+/* --- ACCORDION HEADER (Unverändert) --- */
+.accordionSection {
+  margin-bottom: 12px;
+  background: #161e2e;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.accordionSection:hover {
+  border-color: #4b5563;
+}
+
+.accordionHeader {
+  background: linear-gradient(90deg, #1f2937 0%, #111827 100%);
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #cfaa56;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.accordionHeader:hover {
+  background: linear-gradient(90deg, #2d3748 0%, #1a202c 100%);
+  color: #eecda3;
+}
+
+.arrow {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.arrowRotated {
+  transform: rotate(180deg);
+  color: #cfaa56;
+}
+
+/* --- SCROLL LISTE & DRAGGABLE ITEMS (Hier sind die Änderungen) --- */
+.scrollList {
+  max-height: 220px; 
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px; /* Etwas mehr Padding für die Liste */
+  background: rgba(11, 15, 25, 0.5);
+}
+
+.scrollList::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollList::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+.scrollList::-webkit-scrollbar-thumb:hover {
+  background: #cfaa56;
+}
+
 .sectionTitle {
-  color: #cfaa56; /* Gold */
+  color: #cfaa56;
   font-size: 0.9rem;
   font-weight: bold;
   margin-bottom: 8px;
@@ -163,41 +247,53 @@
   padding-bottom: 4px;
 }
 
+/* ÄNDERUNG: Von Grid auf Flex Column umgestellt */
 .itemGrid {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column; /* Items untereinander */
+  gap: 8px; /* Abstand zwischen den Items */
+  width: 100%; /* Volle Breite nutzen */
 }
 
+/* ÄNDERUNG: Draggable Items auf volle Breite angepasst */
 .draggableItem {
-  width: 50px;
-  height: 50px;
-  background: rgba(31, 41, 55, 0.6); /* Semi-transparent */
-  border: 1px solid #cfaa56; /* Gold Border */
-  border-radius: 8px;
+  width: 100%; /* Volle Breite */
+  height: auto; /* Höhe passt sich dem Inhalt an */
+  padding: 12px; /* Padding für angenehme Höhe */
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid #cfaa56;
+  border-radius: 6px; /* Etwas kleinere Radien für Listen-Look */
   color: #e2e8f0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
+  justify-content: flex-start; /* Text linksbündig */
+  font-size: 1rem; /* Etwas kleinere Schriftgröße für Listen */
   cursor: grab;
   transition: all 0.2s;
-  box-shadow: 0 0 5px rgba(207, 170, 86, 0.1); /* Leichter Glow */
+  box-shadow: 0 0 5px rgba(207, 170, 86, 0.1);
+  text-align: left; /* Text linksbündig */
 }
 
 .draggableItem:hover {
-  background: rgba(207, 170, 86, 0.1);
-  box-shadow: 0 0 10px rgba(207, 170, 86, 0.4); /* Starker Glow beim Hover */
-  transform: translateY(-2px);
+  background: rgba(207, 170, 86, 0.15); /* Etwas heller bei Hover */
+  box-shadow: 0 0 8px rgba(207, 170, 86, 0.3);
+  transform: translateX(2px); /* Leichte Bewegung nach rechts statt oben */
 }
 
 .dragging {
   opacity: 0.4;
 }
 
-/* --- INFO BOX --- */
 .infoBox {
   background: #1f2937;
   border: 1px solid #374151;
   color: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.iconImage {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  object-fit: contain;
 }

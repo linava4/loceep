@@ -1,44 +1,64 @@
-// Profile.jsx
+"use client";
 import React from 'react';
 import style from './page.module.css';
-import Link from 'next/link';
-import Image from 'next/image';
-import LogoutButton from '@/components/logoutButton/LogoutButton';
+import Sidebar from "@/components/sidebar/Sidebar.jsx"; 
 
-const Profile = () => {
+const Settings = () => {
   return (
     <div className={style.container}>
-      <div className={style.sidebar}>
-        <Image
-          src="/LOCeepLogo.png"
-          alt="Logo"
-          width={120}
-          height={80}
-        />
-        <Link href="/profile" className={style.button}>User Data</Link>
-        <Link href="/savedPalaces" className={style.button}>Saved Palaces</Link>
-        <Link href="/settings" className={style.button}>Settings</Link>
-        <LogoutButton />
-      </div>
+      <Sidebar />
 
       <div className={style.main}>
-        <h2>Settings</h2>
-        <form className={style.form}>
-          <p>Language</p>
-          <select className={style.input} required>
-            <option value="">Select a language</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-          </select>
+        
+        {/* NEUER HEADER (Außerhalb der Karte) */}
+        <header className={style.header}>
+            <h2>Settings</h2>
+            <p>App preferences and account control</p>
+        </header>
 
-          <p>Delete Account</p>
-          <button type="submit">Delete now</button>
-        </form>
+        <div className={style.card}>
+            {/* Icon Zentriert in der Karte (wie der Avatar im Profil) */}
+            <div className={style.iconContainer}>
+                <div className={style.iconPlaceholder}>
+                    *
+                </div>
+            </div>
 
-        <p className={style.forgot}>Forgot Password?</p>
+            <form className={style.form}>
+                {/* Language Section */}
+                <div className={style.section}>
+                    <div className={style.inputGroup}>
+                        <label>Language</label>
+                        <select className={style.select} required defaultValue="">
+                            <option value="" disabled>Select a language</option>
+                            <option value="en">English</option>
+                            <option value="de">Deutsch</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Divider */}
+                <hr className={style.divider} />
+
+                {/* Danger Zone */}
+                <div className={style.section}>
+                    <div className={style.dangerZone}>
+                        <div className={style.dangerText}>
+                            <label className={style.dangerLabel}>Delete Account</label>
+                            <span className={style.dangerDesc}>Permanently remove your account and all data.</span>
+                        </div>
+                        <button type="button" className={style.deleteButton}>Delete Account</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div className={style.footer}>
+                 <p className={style.forgot}>Forgot Password? (Reset here)</p>
+            </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Profile;
+export default Settings;

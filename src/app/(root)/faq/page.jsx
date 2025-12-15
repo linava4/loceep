@@ -47,8 +47,13 @@ function FAQItem({ question, answer }) {
 export default function FAQPage() {
   return (
     <div className={styles.container}>
-      <br />
-      <h2>FAQ</h2>
+      
+      {/* NEUER HEADER */}
+      <header className={styles.header}>
+        <h2>FAQ</h2>
+        <p>Common questions and answers about Loceep</p>
+      </header>
+
       <div className={styles.faqList}>
         {FAQS.map((faq) => (
           <FAQItem key={faq.question} {...faq} />

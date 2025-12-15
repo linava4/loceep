@@ -40,13 +40,44 @@ export default function YourPalace() {
 
   const selectedAnchor = elements.find(el => el.id === selected?.id);
 
+  const [collapsedSections, setCollapsedSections] = useState({});
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  const toggleSection = (sectionName) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [sectionName]: !prev[sectionName],
+    }));
+  };
+
   // Verbindungen aus den geladenen Daten übernehmen, wenn Palast geladen wird
   // Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData
   // index.js (Korrigierter useEffect)
   // index.js
 // ...
 // Verbindungen aus den geladenen Daten übernehmen, wenn Palast geladen wird
-// Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData
+// Anpassung von useEffect (oben) zur Nutzung von loadPalaceFromData#
+
+useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/me", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await res.json();
+        if (data.loggedIn) {
+          setLoggedIn(true);
+        } else {
+        }
+      } catch (error) {
+        console.error("Error loading user:", error);
+      } 
+    }
+    loadUser();
+  }, []);
+
   useEffect(() => {
     // 💡 Wir definieren eine asynchrone Funktion im Inneren
     const loadPalace = async () => { // ASYNC-Funktion
@@ -112,6 +143,7 @@ export default function YourPalace() {
           height: Number(room.HEIGHT) * GRID_SIZE,
           variant: room.ROOM_ID,
           src: room.SRC || null,
+          name: room.NAME || "", // Neuer Name-Parameter
         }));
 
         console.log("Gefetchte Räume aus DB:", dbRooms);
@@ -141,6 +173,7 @@ export default function YourPalace() {
           height: Number(anchor.HEIGHT),
           variant: anchor.ANCHOR_ID,
           src: anchor.SRC || null,
+          name: anchor.NAME || "", // Neuer Name-Parameter
         }));
 
         setSidebarItems((prev) =>
@@ -168,6 +201,7 @@ export default function YourPalace() {
           height: Number(obj.HEIGHT),
           variant: obj.OBJECT_ID,
           src: obj.SRC || null,
+          name: obj.NAME || "", // Neuer Name-Parameter
         }));
 
         setSidebarItems((prev) =>
@@ -321,7 +355,7 @@ export default function YourPalace() {
           </div>
 
           <div className={styles.sidebarButtons}>
-            <button onClick={handleSave}>Save</button>
+            <button onClick={handleSave} disabled={!loggedIn}>{loggedIn ? "Save" : "You need to login to save"}</button>
             <button onClick={handleDeleteSelected} disabled={!selected}>
               Delete Selected
             </button>
@@ -355,17 +389,35 @@ export default function YourPalace() {
           {/* Sidebar Items: nur anzeigen im BUILD-Modus */}
           {mode === EditorModes.BUILD &&
             sidebarItems.map((section) => {
+              const isCollapsed = collapsedSections[section.section];
+              
               return (
-                <div className={styles.section} key={section.section}>
-                  <div className={styles.sectionTitle}>{section.section}</div>
-                  <div className={styles.itemGrid}>
-                    {section.items.map((item) => (
-                      <DraggableItem
-                        key={`${item.type}-${item.variant || "default"}`}
-                        {...item}
-                      />
-                    ))}
+                <div className={styles.accordionSection} key={section.section}>
+                  {/* Header */}
+                  <div 
+                    className={styles.accordionHeader} 
+                    onClick={() => toggleSection(section.section)}
+                  >
+                    <span>{section.section}</span>
+                    {/* Wir nutzen eine CSS Klasse für die Rotation, sieht flüssiger aus */}
+                    <span className={`${styles.arrow} ${!isCollapsed ? styles.arrowRotated : ""}`}>
+                      ▼
+                    </span>
                   </div>
+
+                  {/* Inhalt */}
+                  {!isCollapsed && (
+                    <div className={styles.scrollList}>
+                      <div className={styles.itemGrid}>
+                        {section.items.map((item) => (
+                          <DraggableItem
+                            key={`${item.type}-${item.variant || "default"}`}
+                            {...item}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

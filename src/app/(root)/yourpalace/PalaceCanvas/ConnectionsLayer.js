@@ -25,8 +25,10 @@ export default function ConnectionsLayer({ elements, connections, draggingLine, 
           <Line
             key={i}
             points={[x1, y1, x2, y2]}
-            stroke="lightblue"
-            strokeWidth={3}
+            stroke="#cfaa56"
+            shadowColor="#cfaa56"
+            shadowBlur={15}
+            strokeWidth={2}
             tension={0.3}
             lineCap="round"
             lineJoin="round"
