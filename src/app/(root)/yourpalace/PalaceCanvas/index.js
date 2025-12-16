@@ -273,6 +273,10 @@ useEffect(() => {
         });
       const checkDataUser = await checkResUser.json();
 
+      if(payload.name  == "Patient"){
+        return alert("The palace 'Patient' can not be overwritten.");
+      }
+
       if (checkData.exists) {
         const overwrite = confirm(
           `A palace with the name "${payload.name}" already exists. Overwrite?`

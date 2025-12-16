@@ -56,9 +56,11 @@
 .logout {
   margin-top: auto; /* Schiebt Logout nach ganz unten */
   margin-bottom: 30px;
+  padding-left: 20px;
+  padding-bottom: 15px;
   color: #ef4444; /* Rot */
   border-top: 1px solid #374151;
-  padding-top: 20px;
+  padding-top: 15px;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;

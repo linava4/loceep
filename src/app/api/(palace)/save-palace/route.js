@@ -93,18 +93,27 @@ export async function POST(request) {
         { status: 401 }
       );
     }
+    console.log("User ID für Speicherung des Palastes:", userId);
 
     // Palast prüfen oder anlegen
     const [existingPalace] = await db.query(existsPalace, [name, userId ]);
     let palaceId;
 
+
+
     if (existingPalace.length) {
       palaceId = existingPalace[0].PALACE_ID;
       await db.query(updatePalace, [savedAt, palaceId]);
     } else {
-      const [result] = await db.query(newPalace, [name, 1, 0, savedAt]);
+      const [result] = await db.query(newPalace, [name, userId, 0, savedAt]);
       palaceId = result.insertId;
     }
+
+    if (name == "Patient"){
+      return NextResponse.json(
+        { message: "Palace can not be overwritten" },
+        { status: 401 }
+      );}
 
     // Räume (Teilhistorisierung)
     if (rooms?.length) {

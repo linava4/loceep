@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import style from './sidebar.module.css';
-import LogoutButton from '../logoutButton/LogoutButton';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -42,7 +41,9 @@ const Sidebar = () => {
         </Link>
         
         {/* Logout Link oder Button */}
-        <LogoutButton />
+        <Link href="/" className={`${style.navLink} ${style.logout}`}>
+          Log-out
+        </Link>
       </nav>
     </div>
   );

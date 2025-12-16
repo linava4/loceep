@@ -1,8 +1,9 @@
+import { getUserIdFromCredentials } from "@/lib/auth";
 import { createConnection } from "@/lib/db.js";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {  
-   const loadPalace = "SELECT * from palace WHERE PALACE_ID = ? AND USER_ID = 1"; 
+   const loadPalace = "SELECT * from palace WHERE PALACE_ID = ? AND USER_ID = ?"; 
    const loadRooms = `  SELECT 
                             pr.*, 
                             r.*
@@ -10,13 +11,17 @@ export async function GET(request) {
                         JOIN room r ON pr.ROOM_ID = r.ROOM_ID
                         WHERE pr.PALACE_ID = ? AND pr.ACTIVE = 1
                         `;
-    const loadAnchors = `   SELECT 
+    const loadAnchors = `
+                            SELECT 
                                 ra.*, 
-                                a.*
+                                a.*,
+                                ai.*
                             FROM room_anchor ra
                             JOIN anchor a ON ra.ANCHOR_ID = a.ANCHOR_ID
-                            WHERE ra.PALACE_ID = ? AND ra.ACTIVE = 1
-                            `;
+                            LEFT JOIN anchor_info ai ON ra.IDENTIFIER = ai.ANCHOR_IDENTIFIER AND ai.ACTIVE = 1
+                            WHERE ra.PALACE_ID = ? 
+                            AND ra.ACTIVE = 1
+                        `;
     const loadObjects = `   SELECT 
                                 ro.*, 
                                 o.*
@@ -29,6 +34,7 @@ export async function GET(request) {
                             FROM connections
                             WHERE PALACE_ID = ? AND ACTIVE = 1
                             `;
+
    
 
 
@@ -37,7 +43,16 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const palaceId = searchParams.get("palaceId");
 
-        const [palace] = await db.query(loadPalace, [palaceId]);    
+        const userId = await getUserIdFromCredentials(request);
+        
+            if (!userId) {
+              return NextResponse.json(
+                { error: "Nicht autorisiert: Ungültige oder abgelaufene Session." },
+                { status: 401 }
+              );
+            }
+
+        const [palace] = await db.query(loadPalace, [palaceId, userId]);   
         const [rooms] = await db.query(loadRooms, [palaceId]);
         const [anchors]= await db.query(loadAnchors, [palaceId]);
         const [objects]= await db.query(loadObjects, [palaceId]);

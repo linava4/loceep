@@ -88,12 +88,7 @@ export default function usePalaceManager() {
 
 
 
-    console.log("Rohdaten laden:", {
-      rawRooms,
-      rawObjects,
-      rawAnchors,
-      rawConnections,
-    });
+    console.log("Rohdaten laden:", data);
 
     const rooms = rawRooms.map((room) => {
       const identifier = room.IDENTIFIER ?? room.id ?? null;
@@ -160,8 +155,8 @@ export default function usePalaceManager() {
         roomId: parentId, // roomId-Feld dient hier als Parent-ID (Raum oder Objekt)
         variant: anch.ANCHOR_ID ?? null,
         src: anch.SRC || null,
-        infoTitle: anch.INFO_TITLE ?? "", 
-        infoMaterial: anch.INFO_MATERIAL ?? "",
+        infoTitle: anch.TITLE ?? "", 
+        infoMaterial: anch.MATERIAL ?? "",
       };
     });
 

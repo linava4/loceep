@@ -4,6 +4,8 @@
 import { useRouter } from 'next/navigation';
 import style from './page.module.css'; // Falls benötigt
 
+import Link from 'next/link';
+
 export default function LogoutButton() {
     const router = useRouter();
 
@@ -32,12 +34,12 @@ export default function LogoutButton() {
 
     return (
         // Ersetzen Sie <Link> durch einen <button> oder <a> mit onClick
-        <a 
+        <Link
             href="#" // Standardmäßig verweist er auf sich selbst
             onClick={handleLogout} 
             className= {style.logout}
         >
             Log-out
-        </a>
+        </Link>
     );
 }

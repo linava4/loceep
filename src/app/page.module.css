@@ -96,10 +96,12 @@
   padding: 14px 20px;
   text-align: center;
   font-size: 16px;
-  font-weight: 600; /* Dickerer Text für Lesbarkeit */
+  font-weight: bold; /* Dickerer Text für Lesbarkeit */
   cursor: pointer;
   transition: 0.3s;
   border-radius: 4px;
+  
+  text-transform: uppercase;
   
   /* Gold Gradient Style (übernommen vom Sidebar Button) */
   background: linear-gradient(180deg, #eecda3 0%, #dbbf86 100%);

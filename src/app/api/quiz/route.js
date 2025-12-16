@@ -21,19 +21,16 @@ export async function GET(request) {
         }
 
         const db = await createConnection();
-        // const palaceId = 1; // <-- Das hier brauchst du nicht mehr
 
         // WICHTIG: palaceId in die Query geben
         const [anchors] = await db.query(loadAnchors, [palaceId]);
 
         for (const anchor of anchors) {
-            // Hier nutzen wir anchor.ANCHOR_ID (aus der DB), das ist korrekt
             const [info] = await db.query(loadInfo, [anchor.IDENTIFIER]);
             const [src] = await db.query(loadIcons, [anchor.ANCHOR_ID]);
 
             anchor.src = src.length > 0 ? src[0].SRC : null;
             
-            // Sicherheitscheck, falls info leer ist
             if (info && info.length > 0) {
                 anchor.title = info[0].TITLE; // info ist ein Array, also info[0] nutzen
                 anchor.material = info[0].MATERIAL;

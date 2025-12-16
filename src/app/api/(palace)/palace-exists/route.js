@@ -11,7 +11,16 @@ export async function GET(request) {
       return NextResponse.json({ error: "Kein Name angegeben" }, { status: 400 });
     }
 
-    const [rows] = await db.query("SELECT PALACE_ID FROM palace WHERE NAME = ? AND USER_ID = ?", [name, 1]);
+    const userId = await getUserIdFromCredentials(request);
+    
+        if (!userId) {
+          return NextResponse.json(
+            { error: "Nicht autorisiert: Ungültige oder abgelaufene Session." },
+            { status: 401 }
+          );
+        }
+
+    const [rows] = await db.query("SELECT PALACE_ID FROM palace WHERE NAME = ? AND USER_ID = ?", [name, userId]);
     const exists = rows.length > 0;
 
     return NextResponse.json({ exists });

@@ -61,7 +61,7 @@ const AuthForm = ({ type }) => {
     <div className={style.container}>
       <div className={style.card}>
         <h1 className={style.logo}>
-          LOCE<span>EP</span>
+          LOCEEP
         </h1>
         <h2 className={style.title}>{isSignIn ? "Login" : "Register"}</h2>
 
