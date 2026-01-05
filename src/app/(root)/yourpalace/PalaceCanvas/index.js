@@ -11,6 +11,7 @@ import styles from "./styles.module.css";
 import usePalaceManager from "./usePalaceManager";
 import AnchorInfoSidebar from "./AnchorInfo";
 import TutorialOverlay from "./Tutorial";
+import AiSidebar from "./AiSidebar";
 
 
 export default function YourPalace() {
@@ -40,6 +41,7 @@ export default function YourPalace() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const [showTutorial, setShowTutorial] = useState(true);
+  const [showAiSidebar, setShowAiSidebar] = useState(false);
 
   const toggleSection = (sectionName) => {
     setCollapsedSections((prev) => ({
@@ -335,7 +337,20 @@ useEffect(() => {
           />
         )}
 
+        {showAiSidebar && (
+           <AiSidebar 
+              sidebarItems={sidebarItems} 
+              setElements={setElements} 
+           />
+        )}
+
         <div className={styles.canvasContainer}>
+          <button 
+                className={styles.aiToggleButton} 
+                onClick={() => setShowAiSidebar(!showAiSidebar)}
+            >
+                {showAiSidebar ? "Close AI" : "AI Help"}
+            </button>
           <CanvasArea
             elements={elements}
             setElements={setElements}
@@ -381,7 +396,7 @@ useEffect(() => {
 
           {/* Modus-Umschalter */}
           <div className={styles.section}>
-            <div className={styles.sectionTitle}>Modus</div>
+            <div className={styles.sectionTitle}>Mode</div>
             <div className={styles.modeButtons}>
               <button
                 onClick={() => handleSetMode(EditorModes.BUILD)}

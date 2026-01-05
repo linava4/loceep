@@ -55,7 +55,6 @@ export default function AnchorInfoSidebar({ selectedAnchor, setElements, setUnsa
         <div >
             <div className={styles.sectionTitle}>Anchor Info: {selectedAnchor.icon}</div>
             <div className={styles.infoBox}>
-                <p>Anker ID: **{selectedAnchor.id}**</p>
                 <label style={{ display: 'block' }}>Title:</label>
                 <input
                     type="text"
