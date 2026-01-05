@@ -4,7 +4,7 @@ import { Stage, Layer, Rect, Text, Group, Image as KonvaImage} from "react-konva
 import { ItemTypes, GRID_SIZE } from "./constants";
 import { snapToGrid, isOverlapping, findRoomAtPosition, getAbsolutePos } from "./helpers";
 import ConnectionsLayer from "./ConnectionsLayer";
-import { EditorModes } from "./index"; // Importiere Modes
+import { EditorModes } from "./constants"; // Importiere Modes
 import styles from "./styles.module.css";
 
 // Helper: Findet den Parent (Raum oder Objekt) an einer Position

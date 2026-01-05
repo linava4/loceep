@@ -109,11 +109,7 @@ export async function POST(request) {
       palaceId = result.insertId;
     }
 
-    if (name == "Patient"){
-      return NextResponse.json(
-        { message: "Palace can not be overwritten" },
-        { status: 401 }
-      );}
+    
 
     // Räume (Teilhistorisierung)
     if (rooms?.length) {

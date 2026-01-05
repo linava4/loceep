@@ -6,16 +6,12 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CanvasArea from "./CanvasArea";
 import DraggableItem from "./DraggableItem";
-import { ItemTypes, GRID_SIZE, SIDEBAR_ITEMS } from "./constants";
+import { ItemTypes, GRID_SIZE, SIDEBAR_ITEMS, EditorModes } from "./constants";
 import styles from "./styles.module.css";
 import usePalaceManager from "./usePalaceManager";
 import AnchorInfoSidebar from "./AnchorInfo";
+import TutorialOverlay from "./Tutorial";
 
-export const EditorModes = {
-  BUILD: "build",
-  CONNECT: "connect",
-  INFO: "info", // Für zukünftige Nutzung: Anker/Objekt-Infos bearbeiten
-};
 
 export default function YourPalace() {
   const {
@@ -42,6 +38,8 @@ export default function YourPalace() {
 
   const [collapsedSections, setCollapsedSections] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
+
+  const [showTutorial, setShowTutorial] = useState(true);
 
   const toggleSection = (sectionName) => {
     setCollapsedSections((prev) => ({
@@ -328,6 +326,15 @@ useEffect(() => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.container}>
+
+        {showTutorial && (
+          <TutorialOverlay 
+            elements={elements}
+            connections={connections}
+            onClose={() => setShowTutorial(false)}
+          />
+        )}
+
         <div className={styles.canvasContainer}>
           <CanvasArea
             elements={elements}
@@ -359,11 +366,18 @@ useEffect(() => {
           </div>
 
           <div className={styles.sidebarButtons}>
+            <button 
+              className={styles.nextButton}
+              onClick={() => setShowTutorial(true)}
+            >
+               Tutorial
+            </button>
+          
             <button onClick={handleSave} disabled={!loggedIn}>{loggedIn ? "Save" : "You need to login to save"}</button>
             <button onClick={handleDeleteSelected} disabled={!selected}>
               Delete Selected
             </button>
-          </div>
+          </div>  
 
           {/* Modus-Umschalter */}
           <div className={styles.section}>
